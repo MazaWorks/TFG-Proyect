@@ -25,7 +25,7 @@ export default function MainNavigation() {
         component={HabitacionesNavigation}
         options={{
           title: 'Habitaciones',
-          drawerIcon: ({size, color}) => <Icon name="weekend" color={color} />,
+          drawerIcon: ({color}) => <Icon name="weekend" color={color} />,
         }}
       />
       <Drawer.Screen
@@ -33,7 +33,7 @@ export default function MainNavigation() {
         component={SearchDevicesNavigation}
         options={{
           title: 'Dispositivos',
-          drawerIcon: ({size, color}) => <Icon name="cast" color={color} />,
+          drawerIcon: ({color}) => <Icon name="cast" color={color} />,
         }}
       />
     </Drawer.Navigator>

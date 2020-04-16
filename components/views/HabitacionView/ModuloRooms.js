@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect} from 'react';
 import {
   View,
@@ -21,7 +22,7 @@ export default function MainView({navigation, route}) {
     data: {name: null, numberDevices: null},
   });
   const [rooms, getRooms] = useState([]);
-  const {width} = useDimensions().window;
+  const {width, height} = useDimensions().window;
 
   useEffect(() => {
     setLoading(true);
@@ -36,10 +37,7 @@ export default function MainView({navigation, route}) {
             setLoading(false);
           })
           .catch(error => {
-            console.log(
-              'There has been a problem with your fetch operation: ' +
-                error.message,
-            );
+            console.log('Error: ' + error.message);
           });
       } else {
         await AsyncStorage.getItem('rooms')
@@ -50,10 +48,7 @@ export default function MainView({navigation, route}) {
             setLoading(false);
           })
           .catch(error => {
-            console.log(
-              'There has been a problem with your fetch operation: ' +
-                error.message,
-            );
+            console.log('Error: ' + error.message);
           });
       }
     }
@@ -96,10 +91,25 @@ export default function MainView({navigation, route}) {
   if (rooms.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.listHeader}>
+        <View
+          style={[
+            styles.listHeader,
+            {
+              marginTop: height * 0.1,
+              marginBottom: height * 0.05,
+            },
+          ]}>
           <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Room</Text>
         </View>
-        <View style={styles.noDeviceContainer}>
+        <View
+          style={[
+            styles.noDeviceContainer,
+            {
+              padding: width * 0.1,
+              paddingTop: width * 0.05,
+              paddingBottom: width * 0.05,
+            },
+          ]}>
           <Image
             source={require('../../../assets/Rooms/noRooms.png')}
             style={{
@@ -124,16 +134,22 @@ export default function MainView({navigation, route}) {
   }
   return (
     <View style={styles.container}>
+      <View
+        style={[
+          styles.listHeader,
+          {
+            marginTop: height * 0.1,
+            marginBottom: height * 0.05,
+          },
+        ]}>
+        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Room</Text>
+      </View>
       <OptimizedFlatList
-        style={styles.flatList}
+        style={{
+          width: '80%',
+          marginBottom: height * 0.04,
+        }}
         data={rooms}
-        ListHeaderComponent={
-          <View style={styles.listHeader}>
-            <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-              Choose a Room
-            </Text>
-          </View>
-        }
         renderItem={({item}) => <Item data={item} />}
         keyExtractor={(item, index) => index.toString()}
       />
@@ -145,7 +161,14 @@ export default function MainView({navigation, route}) {
 
       <Modal animationType="slide" transparent={true} visible={letDelete.modal}>
         <View style={modalstyle.modalContainer}>
-          <View style={modalstyle.modelComponentsContainer}>
+          <View
+            style={[
+              modalstyle.modelComponentsContainer,
+              {
+                marginBottom: height * 0.2,
+                width: width * 0.7,
+              },
+            ]}>
             <Text style={modalstyle.textStyle}>
               Name: {letDelete.data.name}
             </Text>
@@ -211,8 +234,6 @@ const modalstyle = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     padding: 10,
-    marginBottom: '20%',
-    width: '70%',
   },
   modalOptionsContainer: {
     flexDirection: 'row',
@@ -233,17 +254,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e4ffff',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   listHeader: {
-    marginTop: '10%',
-    marginBottom: '5%',
     alignItems: 'center',
   },
   noDeviceContainer: {
     backgroundColor: '#fff',
-    padding: '10%',
-    paddingTop: '5%',
-    paddingBottom: '5%',
     alignItems: 'center',
   },
   noRoomButton: {
@@ -252,10 +269,6 @@ const styles = StyleSheet.create({
   noDeviceButtonText: {
     fontStyle: 'normal',
     fontSize: 15,
-  },
-  flatList: {
-    width: '80%',
-    marginBottom: '5%',
   },
   iconRoom: {
     marginRight: '5%',

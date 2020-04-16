@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect} from 'react';
 import {
   View,
@@ -15,41 +16,42 @@ import {imagesDevices} from '../../utils/ComponentsUtils';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
-  const [devices, getDevices] = useState([
-    {
-      name: 'MedidorTemperatura',
-      ip: '192.168.0.22',
-      room: 'Habitacion',
-      idDevice: 1,
-    },
-    {
-      name: 'MedidorTemperatura2',
-      ip: '192.168.0.22',
-      room: 'Habitacion',
-      idDevice: 1,
-    },
-  ]);
-
-  const {width} = useDimensions().window;
+  const [devices, getDevices] = useState([]);
+  const {width, height} = useDimensions().window;
 
   useEffect(() => {
+    setLoading(true);
     async function getData() {
-      await AsyncStorage.getItem('devices')
-        .then(value => {
-          if (value != null && value !== '') {
-            getDevices(JSON.parse(value));
-          }
-          setLoading(false);
-        })
-        .catch(error => {
-          console.log(
-            'There has been a problem with your fetch operation: ' +
-              error.message,
-          );
-        });
+      if (route.params != null && route.params.addIndicator) {
+        await AsyncStorage.setItem(
+          'devices',
+          JSON.stringify(route.params.newDevices),
+        )
+          .then(() => {
+            getDevices(route.params.newDevices);
+            setLoading(false);
+          })
+          .catch(error => {
+            console.log('Error: ' + error.message);
+          });
+      } else {
+        await AsyncStorage.getItem('devices')
+          .then(value => {
+            if (value != null && value !== '') {
+              getDevices(JSON.parse(value));
+            }
+            setLoading(false);
+          })
+          .catch(error => {
+            console.log(
+              'There has been a problem with your fetch operation: ' +
+                error.message,
+            );
+          });
+      }
     }
     getData();
-  }, []);
+  }, [route.params]);
 
   const Item = ({data}) => {
     var srcImage = imagesDevices(data.idDevice);
@@ -87,15 +89,33 @@ export default function MainView({navigation, route}) {
   if (devices.length === 0) {
     return (
       <View style={noDeviceStyles.container}>
-        <View style={noDeviceStyles.header}>
+        <View
+          style={[
+            noDeviceStyles.header,
+            {
+              marginTop: height * 0.1,
+              marginBottom: height * 0.05,
+            },
+          ]}>
           <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Room</Text>
         </View>
-        <View style={noDeviceStyles.mainContainer}>
+        <View
+          style={[
+            noDeviceStyles.mainContainer,
+            {
+              padding: '10%',
+              paddingTop: '5%',
+              paddingBottom: '5%',
+            },
+          ]}>
           <Image
             source={require('../../../assets/Devices/noDevices.png')}
             style={[
               noDeviceStyles.image,
-              {width: width * 0.6, height: width * 0.36},
+              {
+                width: width * 0.6,
+                height: width * 0.36,
+              },
             ]}
             resizeMode="contain"
           />
@@ -112,15 +132,22 @@ export default function MainView({navigation, route}) {
 
   return (
     <View style={listStyles.container}>
+      <View
+        style={[
+          noDeviceStyles.header,
+          {
+            marginTop: height * 0.1,
+            marginBottom: height * 0.05,
+          },
+        ]}>
+        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Device</Text>
+      </View>
       <OptimizedFlatList
+        style={{
+          width: width * 0.8,
+          marginBottom: height * 0.04,
+        }}
         data={devices}
-        ListHeaderComponent={
-          <View style={listStyles.header}>
-            <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-              Choose a Device
-            </Text>
-          </View>
-        }
         renderItem={({item}) => <Item data={item} />}
         containerStyle={listStyles.mainContainer}
         keyExtractor={(item, index) => index.toString()}
@@ -128,7 +155,9 @@ export default function MainView({navigation, route}) {
       />
       <TouchableOpacity
         style={listStyles.addRoom}
-        onPress={() => navigation.navigate('SearchingDevices')}>
+        onPress={() =>
+          navigation.navigate('SearchingDevices', {devices: devices})
+        }>
         <Icon name="add" type="material" color="#ffc400" size={40} />
       </TouchableOpacity>
     </View>
@@ -145,6 +174,7 @@ const listStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e4ffff',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   mainContainer: {
     backgroundColor: '#fff',
@@ -183,15 +213,10 @@ const noDeviceStyles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    marginTop: '10%',
-    marginBottom: '5%',
     alignItems: 'center',
   },
   mainContainer: {
     backgroundColor: '#fff',
-    padding: '10%',
-    paddingTop: '5%',
-    paddingBottom: '5%',
     alignItems: 'center',
   },
   image: {
