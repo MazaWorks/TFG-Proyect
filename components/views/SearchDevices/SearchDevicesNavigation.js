@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {TouchableOpacity, StyleSheet} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {createStackNavigator} from '@react-navigation/stack';
 import MainView from './ModuloDevices';
@@ -15,9 +16,6 @@ export default function SearchDevicesNavigation({navigation}) {
         name="Devices"
         component={MainView}
         options={{
-          headerLeft: () => (
-            <Icon name="menu" onPress={() => navigation.openDrawer()} />
-          ),
           headerStyle: {
             backgroundColor: '#00a82a',
           },
@@ -35,11 +33,11 @@ export default function SearchDevicesNavigation({navigation}) {
         component={DeviceView}
         options={{
           headerLeft: () => (
-            <Icon
-              name="arrow-left"
-              type="material-community"
-              onPress={() => navigation.navigate('Devices')}
-            />
+            <TouchableOpacity
+              style={styles.iconHeaderContainer}
+              onPress={() => navigation.navigate('Devices')}>
+              <Icon name="arrow-left" type="material-community" />
+            </TouchableOpacity>
           ),
           headerStyle: {
             backgroundColor: '#00a82a',
@@ -58,11 +56,11 @@ export default function SearchDevicesNavigation({navigation}) {
         component={SearchingDevices}
         options={{
           headerLeft: () => (
-            <Icon
-              name="arrow-left"
-              type="material-community"
-              onPress={() => navigation.navigate('Devices')}
-            />
+            <TouchableOpacity
+              style={styles.iconHeaderContainer}
+              onPress={() => navigation.navigate('Devices')}>
+              <Icon name="arrow-left" type="material-community" />
+            </TouchableOpacity>
           ),
           headerStyle: {
             backgroundColor: '#00a82a',
@@ -79,3 +77,10 @@ export default function SearchDevicesNavigation({navigation}) {
     </Stack.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  iconHeaderContainer: {
+    padding: 5,
+    paddingRight: 10,
+  },
+});

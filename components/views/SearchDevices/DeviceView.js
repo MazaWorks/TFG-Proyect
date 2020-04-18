@@ -1,10 +1,19 @@
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, Text, ActivityIndicator} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  ActivityIndicator,
+  Platform,
+} from 'react-native';
 import {useDimensions} from '@react-native-community/hooks';
 
 export default function DeviceView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
-  const [errorRequest, setErrorRequest] = useState(false);
+  const [errorRequest, setErrorRequest] = useState({
+    indicator: false,
+    error: null,
+  });
   const [readings, getReadings] = useState({
     temperature: 'searching...',
     humidity: 'searching...',
@@ -21,11 +30,13 @@ export default function DeviceView({navigation, route}) {
         });
       })
       .catch(error => {
-        console.log(error.message);
-        setErrorRequest(true);
+        setErrorRequest({
+          indicator: true,
+          error: error.message,
+        });
         getReadings({
-          temperature: 'not available',
-          humidity: 'not available',
+          temperature: 'Not Available',
+          humidity: 'Not Available',
         });
       })
       .finally(() => setLoading(false));
@@ -42,11 +53,13 @@ export default function DeviceView({navigation, route}) {
           });
         })
         .catch(error => {
-          console.log(error.message);
-          setErrorRequest(true);
+          setErrorRequest({
+            indicator: true,
+            error: error.message,
+          });
           getReadings({
-            temperature: 'not available',
-            humidity: 'not available',
+            temperature: 'Not Available',
+            humidity: 'Not Available',
           });
         });
     }, 60000);
@@ -56,7 +69,25 @@ export default function DeviceView({navigation, route}) {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator
+          size={Platform.OS === 'ios' ? 'large' : 90}
+          color="#0000ff"
+        />
+      </View>
+    );
+  }
+
+  if (errorRequest.indicator) {
+    return (
+      <View style={styles.container}>
+        <Text style={[errorStyles.text1, {marginBottom: height * 0.05}]}>
+          {errorRequest.error}
+        </Text>
+        <Text style={errorStyles.text2}>
+          Make sure the device is online and active
+        </Text>
+        <Text style={errorStyles.text2}>You have to be connected </Text>
+        <Text style={errorStyles.text2}>to the same network as the device</Text>
       </View>
     );
   }
@@ -113,5 +144,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
+  },
+});
+
+const errorStyles = StyleSheet.create({
+  text1: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  text2: {
+    fontSize: 15,
+    fontStyle: 'italic',
   },
 });

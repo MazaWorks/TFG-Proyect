@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import {Icon} from 'react-native-elements';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
@@ -28,40 +29,42 @@ export default function SearchingDevices({navigation, route}) {
   }
 
   React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Icon
-          name="done"
-          size={30}
-          onPress={() => {
-            var newValue = Object.assign([], route.params.devices);
-            var addDevices = false;
-            for (var elements of devices) {
-              var add = true;
-              for (var elements2 of newValue) {
-                if (elements.ip === elements2.ip) {
-                  add = false;
-                  break;
+    if (devices.length !== 0) {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity
+            style={styles.iconHeaderContainer}
+            onPress={() => {
+              var newValue = Object.assign([], route.params.devices);
+              var addDevices = false;
+              for (var elements of devices) {
+                var add = true;
+                for (var elements2 of newValue) {
+                  if (elements.ip === elements2.ip) {
+                    add = false;
+                    break;
+                  }
+                }
+                if (add) {
+                  newValue.push(elements);
+                  addDevices = true;
                 }
               }
-              if (add) {
-                newValue.push(elements);
-                addDevices = true;
+              if (addDevices) {
+                navigation.navigate('Devices', {
+                  newDevices: newValue,
+                  addIndicator: addDevices,
+                });
+              } else {
+                navigation.navigate('Devices');
               }
-            }
-            if (addDevices) {
-              navigation.navigate('Devices', {
-                newDevices: newValue,
-                addIndicator: addDevices,
-              });
-            } else {
-              navigation.navigate('Devices');
-            }
-          }}
-        />
-      ),
-      headerRightContainerStyle: {marginRight: '5%'},
-    });
+            }}>
+            <Icon name="done" size={30} />
+          </TouchableOpacity>
+        ),
+        headerRightContainerStyle: {marginRight: '5%'},
+      });
+    }
   }, [devices, navigation, route.params.devices]);
 
   const renderItem = ({item}) => {
@@ -103,8 +106,10 @@ export default function SearchingDevices({navigation, route}) {
       devicesFound.push({
         name: 'MedidorTemperatura',
         ip: rinfo.address,
-        idDevice: 1,
-        room: 'Not Assigned',
+        idDevice: JSON.parse(
+          String.fromCharCode.apply(null, new Uint8Array(data)),
+        ).idDevice,
+        room: 'Bedroom',
       });
     });
 
@@ -113,19 +118,24 @@ export default function SearchingDevices({navigation, route}) {
       clearInterval(interval);
       setLoading(false);
       setDevices(devicesFound);
-    }, 10000);
+    }, 15000);
 
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator
+          size={Platform.OS === 'ios' ? 'large' : 90}
+          color="#0000ff"
+        />
       </View>
     );
   }
 
-  if (!isLoading && devices.length === 0) {
+  if (devices.length === 0) {
     return (
       <View style={styles.container}>
-        <Text style={notFoundStyles.text1}>No devices found</Text>
+        <Text style={[notFoundStyles.text1, {marginBottom: height * 0.05}]}>
+          No devices found
+        </Text>
         <Text style={notFoundStyles.text2}>Make sure you are connected </Text>
         <Text style={notFoundStyles.text2}>
           to the same network as the devices
@@ -159,6 +169,10 @@ export default function SearchingDevices({navigation, route}) {
 }
 
 const styles = StyleSheet.create({
+  iconHeaderContainer: {
+    padding: 5,
+    paddingRight: 10,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f0ffff',

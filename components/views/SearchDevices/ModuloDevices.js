@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import {Button, Icon} from 'react-native-elements';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -17,6 +18,10 @@ import {imagesDevices} from '../../utils/ComponentsUtils';
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, getDevices] = useState([]);
+  const [letDelete, onDelete] = useState({
+    deleteIndicator: false,
+    data: {name: null, numberDevices: null},
+  });
   const {width, height} = useDimensions().window;
 
   useEffect(() => {
@@ -53,12 +58,83 @@ export default function MainView({navigation, route}) {
     getData();
   }, [route.params]);
 
+  React.useLayoutEffect(() => {
+    if (letDelete.deleteIndicator) {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity
+            style={noDeviceStyles.iconHeaderContainer}
+            onPress={() => {
+              var newValue = Object.assign([], devices);
+              var index = devices.indexOf(letDelete.data);
+              if (index >= 0) {
+                newValue.splice(index, 1);
+                try {
+                  AsyncStorage.setItem('devices', JSON.stringify(newValue));
+                } catch (error) {
+                  console.log(error);
+                }
+              }
+              getDevices(newValue);
+              onDelete({
+                deleteIndicator: false,
+                data: {name: null, numberDevices: null},
+              });
+            }}>
+            <Icon name="delete" size={30} />
+          </TouchableOpacity>
+        ),
+        headerRightContainerStyle: {marginRight: '5%'},
+        headerLeftContainerStyle: {marginLeft: '5%'},
+        headerLeft: () => (
+          <TouchableOpacity
+            style={noDeviceStyles.iconHeaderContainer}
+            onPress={() =>
+              onDelete({
+                deleteIndicator: false,
+                data: {name: null, numberDevices: null},
+              })
+            }>
+            <Icon name="close" size={30} />
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            style={noDeviceStyles.iconHeaderContainer}
+            onPress={() => navigation.openDrawer()}>
+            <Icon name="menu" size={30} />
+          </TouchableOpacity>
+        ),
+        headerRight: () => null,
+      });
+    }
+  }, [devices, letDelete, navigation]);
+
   const Item = ({data}) => {
     var srcImage = imagesDevices(data.idDevice);
     return (
       <TouchableOpacity
-        style={[listStyles.mainContainer, {width: width * 0.8}]}
-        onPress={() => navigation.navigate('DeviceView', {device: data})}>
+        style={[
+          listStyles.mainContainer,
+          {
+            width: width * 0.8,
+            backgroundColor:
+              letDelete.deleteIndicator && letDelete.data.ip === data.ip
+                ? 'rgba(0,0,0,0.2)'
+                : 'white',
+          },
+        ]}
+        onPress={() =>
+          letDelete.deleteIndicator
+            ? null
+            : navigation.navigate('DeviceView', {device: data})
+        }
+        onLongPress={() => {
+          onDelete({deleteIndicator: true, data: data});
+        }}>
         <Image
           source={srcImage}
           style={[
@@ -80,8 +156,11 @@ export default function MainView({navigation, route}) {
 
   if (isLoading) {
     return (
-      <View style={listStyles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <View style={noDeviceStyles.loadingContainer}>
+        <ActivityIndicator
+          size={Platform.OS === 'ios' ? 'large' : 90}
+          color="#0000ff"
+        />
       </View>
     );
   }
@@ -174,7 +253,6 @@ const listStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e4ffff',
     alignItems: 'center',
-    justifyContent: 'center',
   },
   mainContainer: {
     backgroundColor: '#fff',
@@ -207,6 +285,16 @@ const listStyles = StyleSheet.create({
 });
 
 const noDeviceStyles = StyleSheet.create({
+  iconHeaderContainer: {
+    padding: 5,
+    paddingRight: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#e4ffff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
     backgroundColor: '#e4ffff',

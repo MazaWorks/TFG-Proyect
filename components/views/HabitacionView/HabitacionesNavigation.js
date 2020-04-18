@@ -1,10 +1,12 @@
 import * as React from 'react';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, TouchableOpacity} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {createStackNavigator} from '@react-navigation/stack';
 import MainView from './ModuloRooms';
 import TypeRoom from './TypeRoom';
 import AddRoom from './AddRoom';
+import RoomView from './RoomView';
+import DeviceView from '../SearchDevices/DeviceView';
 
 const Stack = createStackNavigator();
 
@@ -15,20 +17,12 @@ export default function HabitacionesNavigation({navigation}) {
         name="Home"
         component={MainView}
         options={{
-          headerLeft: () => (
-            <Icon
-              name="menu"
-              size={30}
-              onPress={() => navigation.openDrawer()}
-            />
-          ),
           title: 'Home',
           headerStyle: {
             backgroundColor: '#125c28',
           },
           headerTitleStyle: styles.headerTitleStyle,
           headerTitleContainerStyle: styles.headerComponents,
-          headerLeftContainerStyle: styles.headerComponents,
         }}
       />
       <Stack.Screen
@@ -36,13 +30,13 @@ export default function HabitacionesNavigation({navigation}) {
         component={TypeRoom}
         options={{
           headerLeft: () => (
-            <Icon
-              name="close"
-              size={30}
-              onPress={() => navigation.navigate('Home')}
-            />
+            <TouchableOpacity
+              style={styles.iconHeaderContainer}
+              onPress={() => navigation.navigate('Home')}>
+              <Icon name="close" size={30} />
+            </TouchableOpacity>
           ),
-          title: 'Add Room',
+          title: 'New Room',
           headerStyle: {
             backgroundColor: '#125c28',
           },
@@ -56,13 +50,13 @@ export default function HabitacionesNavigation({navigation}) {
         component={AddRoom}
         options={{
           headerLeft: () => (
-            <Icon
-              name="close"
-              size={30}
-              onPress={() => navigation.navigate('Home')}
-            />
+            <TouchableOpacity
+              style={styles.iconHeaderContainer}
+              onPress={() => navigation.navigate('Home')}>
+              <Icon name="close" size={30} />
+            </TouchableOpacity>
           ),
-          title: 'Add Room',
+          title: 'New Room',
           headerStyle: {
             backgroundColor: '#125c28',
           },
@@ -71,11 +65,59 @@ export default function HabitacionesNavigation({navigation}) {
           headerLeftContainerStyle: styles.headerComponents,
         }}
       />
+      <Stack.Screen
+        name="RoomView"
+        component={RoomView}
+        options={{
+          headerLeft: () => (
+            <TouchableOpacity
+              style={styles.iconHeaderContainer}
+              onPress={() => navigation.navigate('Home')}>
+              <Icon name="arrow-left" type="material-community" />
+            </TouchableOpacity>
+          ),
+          title: 'Room Details',
+          headerStyle: {
+            backgroundColor: '#125c28',
+          },
+          headerTitleStyle: styles.headerTitleStyle,
+          headerTitleContainerStyle: styles.headerComponents,
+          headerLeftContainerStyle: styles.headerComponents,
+          headerTransparent: true,
+        }}
+      />
+      <Stack.Screen
+        name="DeviceView"
+        component={DeviceView}
+        options={{
+          headerLeft: () => (
+            <TouchableOpacity
+              style={styles.iconHeaderContainer}
+              onPress={() => navigation.navigate('RoomView')}>
+              <Icon name="arrow-left" type="material-community" />
+            </TouchableOpacity>
+          ),
+          headerStyle: {
+            backgroundColor: '#00a82a',
+          },
+          headerTitleStyle: {
+            color: '#fff',
+            fontWeight: 'bold',
+            fontSize: 18,
+          },
+          headerTitleContainerStyle: {marginLeft: '5%'},
+          headerLeftContainerStyle: {marginLeft: '5%'},
+        }}
+      />
     </Stack.Navigator>
   );
 }
 
 const styles = StyleSheet.create({
+  iconHeaderContainer: {
+    padding: 5,
+    paddingRight: 10,
+  },
   headerTitleStyle: {
     color: '#ffffff',
     fontWeight: 'bold',

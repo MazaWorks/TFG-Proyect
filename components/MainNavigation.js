@@ -24,7 +24,7 @@ export default function MainNavigation() {
         name="Habitaciones"
         component={HabitacionesNavigation}
         options={{
-          title: 'Habitaciones',
+          title: 'Rooms',
           drawerIcon: ({color}) => <Icon name="weekend" color={color} />,
         }}
       />
@@ -32,7 +32,7 @@ export default function MainNavigation() {
         name="Dispositivos"
         component={SearchDevicesNavigation}
         options={{
-          title: 'Dispositivos',
+          title: 'Devices',
           drawerIcon: ({color}) => <Icon name="cast" color={color} />,
         }}
       />

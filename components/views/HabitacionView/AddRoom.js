@@ -1,6 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
-import {View, StyleSheet, Text, TextInput} from 'react-native';
+import React, {useState, useLayoutEffect} from 'react';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {useDimensions} from '@react-native-community/hooks';
 
@@ -8,12 +14,11 @@ export default function TypeRoom({navigation, route}) {
   const [roomName, onChangeText] = useState(route.params.itemName);
   const {height} = useDimensions().window;
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Icon
-          name="done"
-          size={30}
+        <TouchableOpacity
+          style={styles.iconHeaderContainer}
           onPress={() => {
             var newValue = Object.assign([], route.params.rooms);
             var proceed = true;
@@ -36,8 +41,9 @@ export default function TypeRoom({navigation, route}) {
             } else {
               navigation.navigate('Home');
             }
-          }}
-        />
+          }}>
+          <Icon name="done" size={30} />
+        </TouchableOpacity>
       ),
       headerRightContainerStyle: {marginRight: '5%'},
     });
@@ -71,6 +77,10 @@ export default function TypeRoom({navigation, route}) {
 }
 
 const styles = StyleSheet.create({
+  iconHeaderContainer: {
+    padding: 5,
+    paddingRight: 10,
+  },
   container: {
     flex: 1,
     backgroundColor: '#f0ffff',
