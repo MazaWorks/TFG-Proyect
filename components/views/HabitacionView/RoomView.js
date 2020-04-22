@@ -10,9 +10,9 @@ import {
   Platform,
 } from 'react-native';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
-import AsyncStorage from '@react-native-community/async-storage';
 import {useDimensions} from '@react-native-community/hooks';
-import {imagesDevices} from '../../utils/ComponentsUtils';
+import {imagesDevices} from '../../common/ComponentsUtils';
+import {getDevicesbyRoom} from '../../common/Dao';
 
 export default function RoomView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
@@ -21,27 +21,7 @@ export default function RoomView({navigation, route}) {
 
   useEffect(() => {
     setLoading(true);
-    async function getData() {
-      await AsyncStorage.getItem('devices')
-        .then(value => {
-          if (value != null && value !== '') {
-            var allDevices = JSON.parse(value);
-            var roomDevices = [];
-            for (let device of allDevices) {
-              if (device.room === route.params.data.name) {
-                roomDevices.push(device);
-              }
-            }
-            setDevices(roomDevices);
-          }
-          setLoading(false);
-        })
-        .catch(error => {
-          setLoading(false);
-          console.log(error);
-        });
-    }
-    getData();
+    getDevicesbyRoom(route.params.data.name, setDevices, setLoading);
   }, [route.params.data.name]);
 
   useLayoutEffect(() => {
@@ -91,14 +71,14 @@ export default function RoomView({navigation, route}) {
             styles.listHeader,
             {
               width: '100%',
-              height: height * 0.25,
+              height: height * 0.3,
             },
           ]}>
           <Image
             source={require('../../../assets/Rooms/roomViewTop.png')}
             style={{
               width: '100%',
-              height: '100%',
+              height: '110%',
               alignSelf: 'center',
               opacity: 0.2,
             }}
@@ -126,7 +106,7 @@ export default function RoomView({navigation, route}) {
           source={require('../../../assets/Rooms/roomViewTop.png')}
           style={{
             width: '100%',
-            height: '100%',
+            height: '110%',
             alignSelf: 'center',
             opacity: 0.2,
           }}

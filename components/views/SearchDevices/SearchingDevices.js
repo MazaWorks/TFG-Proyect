@@ -1,18 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
-import {
-  View,
-  StyleSheet,
-  Text,
-  ActivityIndicator,
-  TouchableOpacity,
-  Image,
-  Platform,
-} from 'react-native';
+import React, {useState, useLayoutEffect} from 'react';
+import {View, StyleSheet, Text, TouchableOpacity, Image} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
+import {CircleSnail} from 'react-native-progress';
 import {useDimensions} from '@react-native-community/hooks';
-import {imagesDevices} from '../../utils/ComponentsUtils';
+import {imagesDevices} from '../../common/ComponentsUtils';
 import dgram from 'dgram';
 
 export default function SearchingDevices({navigation, route}) {
@@ -28,36 +21,17 @@ export default function SearchingDevices({navigation, route}) {
     return new Uint8Array(uint);
   }
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (devices.length !== 0) {
       navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
             style={styles.iconHeaderContainer}
             onPress={() => {
-              var newValue = Object.assign([], route.params.devices);
-              var addDevices = false;
-              for (var elements of devices) {
-                var add = true;
-                for (var elements2 of newValue) {
-                  if (elements.ip === elements2.ip) {
-                    add = false;
-                    break;
-                  }
-                }
-                if (add) {
-                  newValue.push(elements);
-                  addDevices = true;
-                }
-              }
-              if (addDevices) {
-                navigation.navigate('Devices', {
-                  newDevices: newValue,
-                  addIndicator: addDevices,
-                });
-              } else {
-                navigation.navigate('Devices');
-              }
+              navigation.navigate('Devices', {
+                newDevices: devices,
+                addIndicator: true,
+              });
             }}>
             <Icon name="done" size={30} />
           </TouchableOpacity>
@@ -65,7 +39,7 @@ export default function SearchingDevices({navigation, route}) {
         headerRightContainerStyle: {marginRight: '5%'},
       });
     }
-  }, [devices, navigation, route.params.devices]);
+  }, [devices, navigation]);
 
   const renderItem = ({item}) => {
     var srcImage = imagesDevices(item.idDevice);
@@ -109,7 +83,6 @@ export default function SearchingDevices({navigation, route}) {
         idDevice: JSON.parse(
           String.fromCharCode.apply(null, new Uint8Array(data)),
         ).idDevice,
-        room: 'Bedroom',
       });
     });
 
@@ -122,9 +95,11 @@ export default function SearchingDevices({navigation, route}) {
 
     return (
       <View style={styles.container}>
-        <ActivityIndicator
-          size={Platform.OS === 'ios' ? 'large' : 90}
-          color="#0000ff"
+        <CircleSnail
+          size={100}
+          duration={5000}
+          spinDuration={1000}
+          strokeCap={'round'}
         />
       </View>
     );

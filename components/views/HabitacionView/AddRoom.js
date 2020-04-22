@@ -20,34 +20,21 @@ export default function TypeRoom({navigation, route}) {
         <TouchableOpacity
           style={styles.iconHeaderContainer}
           onPress={() => {
-            var newValue = Object.assign([], route.params.rooms);
-            var proceed = true;
-            for (let elements of newValue) {
-              if (elements.name === roomName) {
-                proceed = false;
-                break;
-              }
-            }
-            if (proceed) {
-              newValue.push({
+            navigation.navigate('Home', {
+              newRooms: {
                 idRoom: route.params.itemId,
                 name: roomName,
                 numberDevices: 0,
-              });
-              navigation.navigate('Home', {
-                newRooms: newValue,
-                addIndicator: true,
-              });
-            } else {
-              navigation.navigate('Home');
-            }
+              },
+              addIndicator: true,
+            });
           }}>
           <Icon name="done" size={30} />
         </TouchableOpacity>
       ),
       headerRightContainerStyle: {marginRight: '5%'},
     });
-  }, [navigation, roomName, route.params.rooms, route.params.itemId]);
+  }, [navigation, roomName, route.params.itemId]);
 
   return (
     <View style={styles.container}>

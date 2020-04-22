@@ -1,101 +1,44 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
 import {
   View,
   StyleSheet,
   Text,
+  TextInput,
   ActivityIndicator,
   TouchableOpacity,
   Image,
   Platform,
+  Modal,
 } from 'react-native';
 import {Icon, ListItem, Button} from 'react-native-elements';
-import AsyncStorage from '@react-native-community/async-storage';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {useDimensions} from '@react-native-community/hooks';
-import {iconsRooms} from '../../utils/ComponentsUtils';
+import {iconsRooms} from '../../common/ComponentsUtils';
+import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
-  const [letDelete, onDelete] = useState({
+  const [rename, setRename] = useState({indicator: false, name: ''});
+  const [longPress, onLongPress] = useState({
     indicator: false,
-    data: {name: null, numberDevices: null},
+    data: {name: null},
   });
   const [rooms, getRooms] = useState([]);
   const {width, height} = useDimensions().window;
 
   useEffect(() => {
     setLoading(true);
-    async function getData() {
-      if (route.params != null && route.params.addIndicator) {
-        await AsyncStorage.setItem(
-          'rooms',
-          JSON.stringify(route.params.newRooms),
-        )
-          .then(() => {
-            getRooms(route.params.newRooms);
-            setLoading(false);
-          })
-          .catch(error => {
-            console.log('Error: ' + error.message);
-          });
-      } else {
-        await AsyncStorage.getItem('rooms')
-          .then(value => {
-            if (value != null && value !== '') {
-              getRooms(JSON.parse(value));
-            }
-            setLoading(false);
-          })
-          .catch(error => {
-            console.log('Error: ' + error.message);
-          });
-      }
+    if (route.params != null && route.params.addIndicator) {
+      addItem('rooms', rooms, route.params.newRooms, getRooms, setLoading);
+    } else {
+      getAllData('rooms', getRooms, setLoading);
     }
-    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.params]);
 
-  React.useLayoutEffect(() => {
-    if (letDelete.indicator) {
-      navigation.setOptions({
-        headerRight: () => (
-          <TouchableOpacity
-            style={styles.iconHeaderContainer}
-            onPress={() => {
-              var newValue = Object.assign([], rooms);
-              var index = rooms.indexOf(letDelete.data);
-              if (index >= 0) {
-                newValue.splice(index, 1);
-                try {
-                  AsyncStorage.setItem('rooms', JSON.stringify(newValue));
-                } catch (error) {
-                  console.log(error);
-                }
-              }
-              getRooms(newValue);
-              onDelete({
-                indicator: false,
-                data: {name: null, numberDevices: null},
-              });
-            }}>
-            <Icon name="delete" size={30} />
-          </TouchableOpacity>
-        ),
-        headerRightContainerStyle: {marginRight: '5%'},
-        headerLeft: () => (
-          <TouchableOpacity
-            style={styles.iconHeaderContainer}
-            onPress={() =>
-              onDelete({
-                indicator: false,
-                data: {name: null, numberDevices: null},
-              })
-            }>
-            <Icon name="close" size={30} />
-          </TouchableOpacity>
-        ),
-      });
-    } else {
+  useLayoutEffect(() => {
+    if (!longPress.indicator) {
       navigation.setOptions({
         headerLeft: () => (
           <TouchableOpacity
@@ -109,8 +52,23 @@ export default function MainView({navigation, route}) {
         },
         headerRight: () => null,
       });
+    } else {
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            style={styles.iconHeaderContainer}
+            onPress={() =>
+              onLongPress({
+                indicator: false,
+                data: {name: null},
+              })
+            }>
+            <Icon name="close" size={30} />
+          </TouchableOpacity>
+        ),
+      });
     }
-  }, [letDelete, navigation, rooms]);
+  }, [longPress, navigation, rooms]);
 
   const Item = ({data}) => {
     var icon = iconsRooms(data.idRoom);
@@ -119,29 +77,29 @@ export default function MainView({navigation, route}) {
         <ListItem
           roundAvatar
           title={data.name}
-          titleStyle={styles.roomName}
+          titleStyle={listStyles.roomName}
           subtitle={`Number of Devices ${data.numberDevices}`}
-          subtitleStyle={styles.numberDevices}
+          subtitleStyle={listStyles.numberDevices}
           leftElement={
-            <View style={styles.iconRoom}>
+            <View style={listStyles.iconRoom}>
               <Icon name={icon.icon_name} type={icon.type} color="#4bab22" />
             </View>
           }
           containerStyle={{
             backgroundColor:
-              letDelete.indicator && letDelete.data.name === data.name
+              longPress.indicator && longPress.data.name === data.name
                 ? 'rgba(0,0,0,0.3)'
                 : 'white',
           }}
           bottomDivider
           chevron
           onPress={() =>
-            letDelete.indicator
+            longPress.indicator
               ? null
               : navigation.navigate('RoomView', {data: data})
           }
           onLongPress={() => {
-            onDelete({indicator: true, data: data});
+            onLongPress({indicator: true, data: data});
           }}
         />
       </TouchableOpacity>
@@ -217,21 +175,187 @@ export default function MainView({navigation, route}) {
       <OptimizedFlatList
         style={{
           width: '80%',
-          marginBottom: height * 0.04,
+          marginBottom: longPress.indicator ? height * 0.1 : height * 0.04,
         }}
         data={rooms}
         renderItem={({item}) => <Item data={item} />}
         keyExtractor={(item, index) => index.toString()}
         removeClippedSubviews={true}
       />
-      <TouchableOpacity
-        style={styles.addRoom}
-        onPress={() => navigation.navigate('TypeRoom', {rooms: rooms})}>
-        <Icon name="add" type="material" color="#ffc400" size={40} />
-      </TouchableOpacity>
+      {!longPress.indicator && (
+        <TouchableOpacity
+          style={styles.addRoom}
+          onPress={() => navigation.navigate('TypeRoom')}>
+          <Icon name="add" type="material" color="#ffc400" size={40} />
+        </TouchableOpacity>
+      )}
+      {longPress.indicator && (
+        <View style={[optionsMenu.container, {height: height * 0.09}]}>
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
+              setRename({indicator: true, name: longPress.data.name});
+            }}>
+            <Icon name="edit" size={30} />
+            <Text style={optionsMenu.text}>Rename</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
+              var array = Object.assign([], rooms);
+              deleteItem('rooms', array, longPress.data, getRooms);
+              onLongPress({
+                indicator: false,
+                data: {name: null},
+              });
+            }}>
+            <Icon name="delete" size={30} />
+            <Text style={optionsMenu.text}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={rename.indicator}>
+        <View style={modalStyle.modalContainer}>
+          <View
+            style={[
+              modalStyle.modelComponentsContainer,
+              {
+                marginBottom: height * 0.05,
+                width: width * 0.9,
+              },
+            ]}>
+            <Text style={modalStyle.topText}>Type a new name</Text>
+            <TextInput
+              style={modalStyle.textInput}
+              textAlign="center"
+              textContentType="name"
+              onChangeText={text => setRename({indicator: true, name: text})}
+              value={rename.name}
+            />
+            <View style={modalStyle.modalOptionsContainer}>
+              <TouchableOpacity
+                style={modalStyle.modalOptionCancel}
+                onPress={() => {
+                  setRename({indicator: false, name: ''});
+                }}>
+                <Text style={modalStyle.textStyle}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={modalStyle.modalOptionDelete}
+                activeOpacity={rename.name !== longPress.data.name ? 0.2 : 1}
+                onPress={() => {
+                  if (rename.name !== longPress.data.name) {
+                    var array = Object.assign([], rooms);
+                    renameItem('rooms', array, longPress.data, rename);
+                    setRename({indicator: false, name: ''});
+                    onLongPress({
+                      indicator: false,
+                      data: {name: null},
+                    });
+                  }
+                }}>
+                <Text
+                  style={[
+                    modalStyle.textStyle,
+                    {
+                      color:
+                        rename.name !== longPress.data.name ? 'black' : 'grey',
+                    },
+                  ]}>
+                  Rename
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
+
+const modalStyle = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modelComponentsContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+  },
+  topText: {
+    fontWeight: '800',
+    fontSize: 18,
+    alignSelf: 'center',
+    padding: '5%',
+  },
+  textInput: {
+    borderBottomWidth: 1,
+    borderTopWidth: 1,
+    borderColor: 'grey',
+    padding: 5,
+  },
+  modalOptionsContainer: {
+    flexDirection: 'row',
+  },
+  modalOptionDelete: {
+    flex: 1,
+    padding: 10,
+    borderLeftWidth: 1,
+    borderColor: 'grey',
+  },
+  modalOptionCancel: {
+    flex: 1,
+    padding: 10,
+    borderRightWidth: 1,
+    borderColor: 'grey',
+  },
+  textStyle: {
+    alignSelf: 'center',
+    fontWeight: '500',
+    fontSize: 15,
+  },
+});
+
+const optionsMenu = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    width: '100%',
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    backgroundColor: 'white',
+  },
+  iconsContainer: {
+    width: '18%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    fontStyle: 'italic',
+    fontSize: 12,
+    fontWeight: '400',
+  },
+});
+
+const listStyles = StyleSheet.create({
+  iconRoom: {
+    marginRight: '5%',
+  },
+  roomName: {
+    fontWeight: '400',
+    fontSize: 13,
+  },
+  numberDevices: {
+    fontStyle: 'italic',
+    fontSize: 10,
+  },
+});
 
 const styles = StyleSheet.create({
   iconHeaderContainer: {
@@ -263,17 +387,6 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontSize: 15,
   },
-  iconRoom: {
-    marginRight: '5%',
-  },
-  roomName: {
-    fontWeight: '400',
-    fontSize: 13,
-  },
-  numberDevices: {
-    fontStyle: 'italic',
-    fontSize: 10,
-  },
   addRoom: {
     position: 'absolute',
     right: '5%',
@@ -284,89 +397,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-/*
-      <Modal animationType="slide" transparent={true} visible={letDelete.modal}>
-        <View style={modalstyle.modalContainer}>
-          <View
-            style={[
-              modalstyle.modelComponentsContainer,
-              {
-                marginBottom: height * 0.05,
-                width: width * 0.7,
-              },
-            ]}>
-            <Text style={modalstyle.textStyle}>
-              Name: {letDelete.data.name}
-            </Text>
-            <Text style={modalstyle.textStyle}>
-              Devices: {letDelete.data.numberDevices}
-            </Text>
-            <View style={modalstyle.modalOptionsContainer}>
-              <TouchableOpacity>
-                <Button
-                  titleStyle={modalstyle.textStyle}
-                  type="outline"
-                  title="Cancel"
-                  buttonStyle={modalstyle.modalOptionCancel}
-                  onPress={() => {
-                    onDelete({
-                      indicator: false,
-                      data: {name: null, numberDevices: null},
-                    });
-                  }}
-                />
-              </TouchableOpacity>
-              <TouchableOpacity style={modalstyle.modalOptionDelete}>
-                <Button
-                  titleStyle={modalstyle.textStyle}
-                  buttonStyle={modalstyle.modalOptionDelete}
-                  type="solid"
-                  title="Continue"
-                  onPress={() => {
-                    var newValue = Object.assign([], rooms);
-                    var index = rooms.indexOf(letDelete.data);
-                    if (index >= 0) {
-                      newValue.splice(index, 1);
-                      try {
-                        AsyncStorage.setItem('rooms', JSON.stringify(newValue));
-                      } catch (error) {
-                        console.log(error);
-                      }
-                    }
-                    getRooms(newValue);
-                    onDelete({
-                      modal: false,
-                      data: {name: null, numberDevices: null},
-                    });
-                  }}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-const modalstyle = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  modelComponentsContainer: {
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    padding: 10,
-  },
-  modalOptionsContainer: {
-    flexDirection: 'row',
-    alignSelf: 'flex-end',
-    padding: 10,
-  },
-  modalOptionCancel: {
-    marginRight: 10,
-  },
-  textStyle: {
-    fontWeight: '500',
-    fontSize: 15,
-  },
-});*/

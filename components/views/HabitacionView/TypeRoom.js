@@ -55,7 +55,6 @@ export default function TypeRoom({navigation, route}) {
         navigation.navigate('AddRoom', {
           itemId: item.id,
           itemName: item.room,
-          rooms: route.params.rooms,
         })
       }>
       <View

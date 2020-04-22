@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -10,75 +10,48 @@ import {
   Platform,
 } from 'react-native';
 import {Button, Icon} from 'react-native-elements';
-import AsyncStorage from '@react-native-community/async-storage';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {useDimensions} from '@react-native-community/hooks';
-import {imagesDevices} from '../../utils/ComponentsUtils';
+import {imagesDevices} from '../../common/ComponentsUtils';
+import {getAllData, addItem, deleteItem} from '../../common/Dao';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, getDevices] = useState([]);
-  const [letDelete, onDelete] = useState({
-    deleteIndicator: false,
-    data: {name: null, numberDevices: null},
+  const [longPress, onLongPress] = useState({
+    indicator: false,
+    data: null,
   });
   const {width, height} = useDimensions().window;
 
   useEffect(() => {
-    setLoading(true);
-    async function getData() {
-      if (route.params != null && route.params.addIndicator) {
-        await AsyncStorage.setItem(
-          'devices',
-          JSON.stringify(route.params.newDevices),
-        )
-          .then(() => {
-            getDevices(route.params.newDevices);
-            setLoading(false);
-          })
-          .catch(error => {
-            console.log('Error: ' + error.message);
-          });
-      } else {
-        await AsyncStorage.getItem('devices')
-          .then(value => {
-            if (value != null && value !== '') {
-              getDevices(JSON.parse(value));
-            }
-            setLoading(false);
-          })
-          .catch(error => {
-            console.log(
-              'There has been a problem with your fetch operation: ' +
-                error.message,
-            );
-          });
-      }
+    if (route.params != null && route.params.addIndicator) {
+      addItem(
+        'devices',
+        devices,
+        route.params.newDevices,
+        getDevices,
+        setLoading,
+      );
+    } else {
+      setLoading(true);
+      getAllData('devices', getDevices, setLoading);
     }
-    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.params]);
 
-  React.useLayoutEffect(() => {
-    if (letDelete.deleteIndicator) {
+  useLayoutEffect(() => {
+    if (longPress.indicator) {
       navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
             style={noDeviceStyles.iconHeaderContainer}
             onPress={() => {
               var newValue = Object.assign([], devices);
-              var index = devices.indexOf(letDelete.data);
-              if (index >= 0) {
-                newValue.splice(index, 1);
-                try {
-                  AsyncStorage.setItem('devices', JSON.stringify(newValue));
-                } catch (error) {
-                  console.log(error);
-                }
-              }
-              getDevices(newValue);
-              onDelete({
-                deleteIndicator: false,
-                data: {name: null, numberDevices: null},
+              deleteItem('devices', newValue, longPress.data, getDevices);
+              onLongPress({
+                indicator: false,
+                data: null,
               });
             }}>
             <Icon name="delete" size={30} />
@@ -90,9 +63,9 @@ export default function MainView({navigation, route}) {
           <TouchableOpacity
             style={noDeviceStyles.iconHeaderContainer}
             onPress={() =>
-              onDelete({
-                deleteIndicator: false,
-                data: {name: null, numberDevices: null},
+              onLongPress({
+                indicator: false,
+                data: null,
               })
             }>
             <Icon name="close" size={30} />
@@ -108,10 +81,9 @@ export default function MainView({navigation, route}) {
             <Icon name="menu" size={30} />
           </TouchableOpacity>
         ),
-        headerRight: () => null,
       });
     }
-  }, [devices, letDelete, navigation]);
+  }, [devices, longPress, navigation]);
 
   const Item = ({data}) => {
     var srcImage = imagesDevices(data.idDevice);
@@ -122,18 +94,18 @@ export default function MainView({navigation, route}) {
           {
             width: width * 0.8,
             backgroundColor:
-              letDelete.deleteIndicator && letDelete.data.ip === data.ip
+              longPress.indicator && longPress.data.ip === data.ip
                 ? 'rgba(0,0,0,0.2)'
                 : 'white',
           },
         ]}
         onPress={() =>
-          letDelete.deleteIndicator
+          longPress.indicator
             ? null
             : navigation.navigate('DeviceView', {device: data})
         }
         onLongPress={() => {
-          onDelete({deleteIndicator: true, data: data});
+          onLongPress({indicator: true, data: data});
         }}>
         <Image
           source={srcImage}
@@ -203,6 +175,7 @@ export default function MainView({navigation, route}) {
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
             title="Find Devices"
+            onPress={() => navigation.navigate('SearchingDevices')}
           />
         </View>
       </View>
@@ -234,9 +207,7 @@ export default function MainView({navigation, route}) {
       />
       <TouchableOpacity
         style={listStyles.addRoom}
-        onPress={() =>
-          navigation.navigate('SearchingDevices', {devices: devices})
-        }>
+        onPress={() => navigation.navigate('SearchingDevices')}>
         <Icon name="add" type="material" color="#ffc400" size={40} />
       </TouchableOpacity>
     </View>
