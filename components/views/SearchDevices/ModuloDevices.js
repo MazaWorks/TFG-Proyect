@@ -8,56 +8,50 @@ import {
   TouchableOpacity,
   Image,
   Platform,
+  Modal,
+  TextInput,
 } from 'react-native';
 import {Button, Icon} from 'react-native-elements';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {useDimensions} from '@react-native-community/hooks';
 import {imagesDevices} from '../../common/ComponentsUtils';
-import {getAllData, addItem, deleteItem} from '../../common/Dao';
+import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
+import {useIsFocused} from '@react-navigation/native';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, getDevices] = useState([]);
+  const [rename, setRename] = useState({indicator: false});
   const [longPress, onLongPress] = useState({
     indicator: false,
-    data: null,
+    data: {},
   });
   const {width, height} = useDimensions().window;
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (route.params != null && route.params.addIndicator) {
-      addItem(
-        'devices',
-        devices,
-        route.params.newDevices,
-        getDevices,
-        setLoading,
-      );
-    } else {
+    if (isFocused) {
       setLoading(true);
-      getAllData('devices', getDevices, setLoading);
+      if (route.params != null && route.params.addIndicator) {
+        addItem('devices', devices, route.params.newDevices).then(value => {
+          if (value != null) {
+            getDevices(value);
+          }
+          setLoading(false);
+        });
+      } else {
+        getAllData('devices').then(value => {
+          getDevices(value);
+          setLoading(false);
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.params]);
+  }, [route.params, isFocused]);
 
   useLayoutEffect(() => {
     if (longPress.indicator) {
       navigation.setOptions({
-        headerRight: () => (
-          <TouchableOpacity
-            style={noDeviceStyles.iconHeaderContainer}
-            onPress={() => {
-              var newValue = Object.assign([], devices);
-              deleteItem('devices', newValue, longPress.data, getDevices);
-              onLongPress({
-                indicator: false,
-                data: null,
-              });
-            }}>
-            <Icon name="delete" size={30} />
-          </TouchableOpacity>
-        ),
-        headerRightContainerStyle: {marginRight: '5%'},
         headerLeftContainerStyle: {marginLeft: '5%'},
         headerLeft: () => (
           <TouchableOpacity
@@ -65,7 +59,7 @@ export default function MainView({navigation, route}) {
             onPress={() =>
               onLongPress({
                 indicator: false,
-                data: null,
+                data: {},
               })
             }>
             <Icon name="close" size={30} />
@@ -120,7 +114,9 @@ export default function MainView({navigation, route}) {
         />
         <View style={{width: (width * 0.8 * 4) / 6}}>
           <Text style={listStyles.name}>{data.name}</Text>
-          <Text style={listStyles.subtitle}>{data.room}</Text>
+          <Text style={listStyles.subtitle}>
+            {data.room != null ? data.room : 'Not Assigned'}
+          </Text>
         </View>
       </TouchableOpacity>
     );
@@ -205,11 +201,118 @@ export default function MainView({navigation, route}) {
         keyExtractor={(item, index) => index.toString()}
         numColumns={1}
       />
-      <TouchableOpacity
-        style={listStyles.addRoom}
-        onPress={() => navigation.navigate('SearchingDevices')}>
-        <Icon name="add" type="material" color="#ffc400" size={40} />
-      </TouchableOpacity>
+      {!longPress.indicator && (
+        <TouchableOpacity
+          style={listStyles.addRoom}
+          onPress={() => navigation.navigate('SearchingDevices')}>
+          <Icon name="add" type="material" color="#ffc400" size={40} />
+        </TouchableOpacity>
+      )}
+      {longPress.indicator && (
+        <View style={[optionsMenu.container, {height: height * 0.09}]}>
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
+              setRename({indicator: true, name: longPress.data.name});
+            }}>
+            <Icon name="edit" size={30} />
+            <Text style={optionsMenu.text}>Rename</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
+              setLoading(true);
+              var array = Object.assign([], devices);
+              deleteItem('devices', array, longPress.data).then(value => {
+                getDevices(value);
+                onLongPress({
+                  indicator: false,
+                  data: {},
+                });
+                setLoading(false);
+              });
+            }}>
+            <Icon name="delete" size={30} />
+            <Text style={optionsMenu.text}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={rename.indicator}>
+        <View style={modalStyle.modalContainer}>
+          <View
+            style={[
+              modalStyle.modelComponentsContainer,
+              {
+                marginBottom: height * 0.05,
+                width: width * 0.9,
+              },
+            ]}>
+            <Text style={modalStyle.topText}>Type a new name</Text>
+            <TextInput
+              style={modalStyle.textInput}
+              textAlign="center"
+              textContentType="name"
+              onChangeText={text => setRename({indicator: true, name: text})}
+              value={rename.name}
+            />
+            <View style={modalStyle.modalOptionsContainer}>
+              <TouchableOpacity
+                style={modalStyle.modalOptionCancel}
+                onPress={() => {
+                  setRename({indicator: false});
+                }}>
+                <Text style={modalStyle.textStyle}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={modalStyle.modalOptionDelete}
+                activeOpacity={rename.name !== longPress.data.name ? 0.2 : 1}
+                onPress={() => {
+                  setRename({indicator: false});
+                  onLongPress({
+                    indicator: false,
+                    data: {},
+                  });
+                  if (rename.name !== longPress.data.name) {
+                    var continuar = true;
+                    for (let device of devices) {
+                      if (device.name === rename.name) {
+                        continuar = false;
+                        break;
+                      }
+                    }
+                    if (continuar) {
+                      setLoading(true);
+                      var array = Object.assign([], devices);
+                      renameItem(
+                        'devices',
+                        array,
+                        longPress.data,
+                        rename.name,
+                      ).then(value => {
+                        getDevices(value);
+                        setLoading(false);
+                      });
+                    }
+                  }
+                }}>
+                <Text
+                  style={[
+                    modalStyle.textStyle,
+                    {
+                      color:
+                        rename.name !== longPress.data.name ? 'black' : 'grey',
+                    },
+                  ]}>
+                  Rename
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -289,5 +392,72 @@ const noDeviceStyles = StyleSheet.create({
   buttonText: {
     fontStyle: 'normal',
     fontSize: 15,
+  },
+});
+
+const modalStyle = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modelComponentsContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+  },
+  topText: {
+    fontWeight: '800',
+    fontSize: 18,
+    alignSelf: 'center',
+    padding: '5%',
+  },
+  textInput: {
+    borderBottomWidth: 1,
+    borderTopWidth: 1,
+    borderColor: 'grey',
+    padding: 5,
+  },
+  modalOptionsContainer: {
+    flexDirection: 'row',
+  },
+  modalOptionDelete: {
+    flex: 1,
+    padding: 10,
+    borderLeftWidth: 1,
+    borderColor: 'grey',
+  },
+  modalOptionCancel: {
+    flex: 1,
+    padding: 10,
+    borderRightWidth: 1,
+    borderColor: 'grey',
+  },
+  textStyle: {
+    alignSelf: 'center',
+    fontWeight: '500',
+    fontSize: 15,
+  },
+});
+
+const optionsMenu = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    width: '100%',
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    backgroundColor: 'white',
+  },
+  iconsContainer: {
+    width: '18%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    fontStyle: 'italic',
+    fontSize: 12,
+    fontWeight: '400',
   },
 });

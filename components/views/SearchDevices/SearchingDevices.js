@@ -8,7 +8,7 @@ import {useDimensions} from '@react-native-community/hooks';
 import {imagesDevices} from '../../common/ComponentsUtils';
 import dgram from 'dgram';
 
-export default function SearchingDevices({navigation, route}) {
+export default function SearchingDevices({navigation}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, setDevices] = useState([]);
   const {width, height} = useDimensions().window;
@@ -74,12 +74,14 @@ export default function SearchingDevices({navigation, route}) {
     socket.once('listening', function() {
       var msg = toByteArray('?');
       socket.send(msg, 0, msg.length, 8080, '192.168.0.255');
+      socket.send(msg, 0, msg.length, 8080, '192.168.0.255');
     });
 
     socket.on('message', function(data, rinfo) {
       devicesFound.push({
         name: 'MedidorTemperatura',
         ip: rinfo.address,
+        room: 'Bedroom',
         idDevice: JSON.parse(
           String.fromCharCode.apply(null, new Uint8Array(data)),
         ).idDevice,
@@ -91,7 +93,7 @@ export default function SearchingDevices({navigation, route}) {
       clearInterval(interval);
       setLoading(false);
       setDevices(devicesFound);
-    }, 15000);
+    }, 2000);
 
     return (
       <View style={styles.container}>

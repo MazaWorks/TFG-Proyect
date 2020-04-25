@@ -4,6 +4,7 @@ import {Icon} from 'react-native-elements';
 import {createStackNavigator} from '@react-navigation/stack';
 import MainView from './ModuloRooms';
 import TypeRoom from './TypeRoom';
+import AddDevices from './AddDevices';
 import AddRoom from './AddRoom';
 import RoomView from './RoomView';
 import DeviceView from '../SearchDevices/DeviceView';
@@ -23,6 +24,30 @@ export default function HabitacionesNavigation({navigation}) {
           },
           headerTitleStyle: styles.headerTitleStyle,
           headerTitleContainerStyle: styles.headerComponents,
+        }}
+      />
+      <Stack.Screen
+        name="AddDevice"
+        component={AddDevices}
+        options={{
+          title: 'Replace',
+          headerLeft: () => (
+            <TouchableOpacity
+              style={styles.iconHeaderContainer}
+              onPress={() => navigation.navigate('Home')}>
+              <Icon name="arrow-left" type="material-community" />
+            </TouchableOpacity>
+          ),
+          headerStyle: {
+            backgroundColor: '#00a82a',
+          },
+          headerTitleStyle: {
+            color: '#fff',
+            fontWeight: 'bold',
+            fontSize: 18,
+          },
+          headerTitleContainerStyle: {marginLeft: '5%'},
+          headerLeftContainerStyle: {marginLeft: '5%'},
         }}
       />
       <Stack.Screen

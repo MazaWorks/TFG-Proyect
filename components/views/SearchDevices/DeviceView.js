@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -19,6 +19,12 @@ export default function DeviceView({navigation, route}) {
     humidity: 'searching...',
   });
   const {width, height} = useDimensions().window;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: route.params.device.name,
+    });
+  });
 
   useEffect(() => {
     fetch('http://' + route.params.device.ip + '/readings')

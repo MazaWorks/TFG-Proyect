@@ -21,7 +21,10 @@ export default function RoomView({navigation, route}) {
 
   useEffect(() => {
     setLoading(true);
-    getDevicesbyRoom(route.params.data.name, setDevices, setLoading);
+    getDevicesbyRoom(route.params.data.name).then(value => {
+      setDevices(value);
+      setLoading(false);
+    });
   }, [route.params.data.name]);
 
   useLayoutEffect(() => {
@@ -46,7 +49,7 @@ export default function RoomView({navigation, route}) {
             }}
             resizeMode="contain"
           />
-          <Text style={styles.textStyle}>{item.ip}</Text>
+          <Text style={styles.textStyle}>{item.name}</Text>
         </View>
       </TouchableOpacity>
     );

@@ -19,10 +19,10 @@ import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
-  const [rename, setRename] = useState({indicator: false, name: ''});
+  const [rename, setRename] = useState({indicator: false});
   const [longPress, onLongPress] = useState({
     indicator: false,
-    data: {name: null},
+    data: {},
   });
   const [rooms, getRooms] = useState([]);
   const {width, height} = useDimensions().window;
@@ -30,9 +30,15 @@ export default function MainView({navigation, route}) {
   useEffect(() => {
     setLoading(true);
     if (route.params != null && route.params.addIndicator) {
-      addItem('rooms', rooms, route.params.newRooms, getRooms, setLoading);
+      addItem('rooms', rooms, route.params.newRooms).then(value => {
+        getRooms(value);
+        setLoading(false);
+      });
     } else {
-      getAllData('rooms', getRooms, setLoading);
+      getAllData('rooms').then(value => {
+        getRooms(value);
+        setLoading(false);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.params]);
@@ -50,7 +56,6 @@ export default function MainView({navigation, route}) {
         headerLeftContainerStyle: {
           marginLeft: '5%',
         },
-        headerRight: () => null,
       });
     } else {
       navigation.setOptions({
@@ -60,7 +65,7 @@ export default function MainView({navigation, route}) {
             onPress={() =>
               onLongPress({
                 indicator: false,
-                data: {name: null},
+                data: {},
               })
             }>
             <Icon name="close" size={30} />
@@ -194,6 +199,18 @@ export default function MainView({navigation, route}) {
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
             onPress={() => {
+              navigation.navigate('AddDevice', {data: longPress.data});
+              onLongPress({
+                indicator: false,
+                data: {},
+              });
+            }}>
+            <Icon name="devices" size={30} />
+            <Text style={optionsMenu.text}>Add Device</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
               setRename({indicator: true, name: longPress.data.name});
             }}>
             <Icon name="edit" size={30} />
@@ -202,11 +219,15 @@ export default function MainView({navigation, route}) {
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
             onPress={() => {
+              setLoading(true);
               var array = Object.assign([], rooms);
-              deleteItem('rooms', array, longPress.data, getRooms);
-              onLongPress({
-                indicator: false,
-                data: {name: null},
+              deleteItem('rooms', array, longPress.data).then(value => {
+                getRooms(value);
+                onLongPress({
+                  indicator: false,
+                  data: {},
+                });
+                setLoading(false);
               });
             }}>
             <Icon name="delete" size={30} />
@@ -239,7 +260,7 @@ export default function MainView({navigation, route}) {
               <TouchableOpacity
                 style={modalStyle.modalOptionCancel}
                 onPress={() => {
-                  setRename({indicator: false, name: ''});
+                  setRename({indicator: false});
                 }}>
                 <Text style={modalStyle.textStyle}>Cancel</Text>
               </TouchableOpacity>
@@ -247,14 +268,32 @@ export default function MainView({navigation, route}) {
                 style={modalStyle.modalOptionDelete}
                 activeOpacity={rename.name !== longPress.data.name ? 0.2 : 1}
                 onPress={() => {
+                  setRename({indicator: false});
+                  onLongPress({
+                    indicator: false,
+                    data: {},
+                  });
                   if (rename.name !== longPress.data.name) {
-                    var array = Object.assign([], rooms);
-                    renameItem('rooms', array, longPress.data, rename);
-                    setRename({indicator: false, name: ''});
-                    onLongPress({
-                      indicator: false,
-                      data: {name: null},
-                    });
+                    var continuar = true;
+                    for (let room of rooms) {
+                      if (room.name === rename.name) {
+                        continuar = false;
+                        break;
+                      }
+                    }
+                    if (continuar) {
+                      setLoading(true);
+                      var array = Object.assign([], rooms);
+                      renameItem(
+                        'rooms',
+                        array,
+                        longPress.data,
+                        rename.name,
+                      ).then(value => {
+                        getRooms(value);
+                        setLoading(false);
+                      });
+                    }
                   }
                 }}>
                 <Text
