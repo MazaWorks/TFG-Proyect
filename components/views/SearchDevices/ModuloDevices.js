@@ -13,10 +13,10 @@ import {
 } from 'react-native';
 import {Button, Icon} from 'react-native-elements';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
-import {useDimensions} from '@react-native-community/hooks';
+import {useDimensions, useKeyboard} from '@react-native-community/hooks';
+import {useIsFocused} from '@react-navigation/native';
 import {imagesDevices} from '../../common/ComponentsUtils';
 import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
-import {useIsFocused} from '@react-navigation/native';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
@@ -27,6 +27,7 @@ export default function MainView({navigation, route}) {
     data: {},
   });
   const {width, height} = useDimensions().window;
+  const keyboard = useKeyboard();
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function MainView({navigation, route}) {
           }
           setLoading(false);
         });
+        route.params = null;
       } else {
         getAllData('devices').then(value => {
           getDevices(value);
@@ -246,7 +248,9 @@ export default function MainView({navigation, route}) {
             style={[
               modalStyle.modelComponentsContainer,
               {
-                marginBottom: height * 0.05,
+                marginBottom: keyboard.keyboardShown
+                  ? height * 0.05
+                  : height * 0.2,
                 width: width * 0.9,
               },
             ]}>

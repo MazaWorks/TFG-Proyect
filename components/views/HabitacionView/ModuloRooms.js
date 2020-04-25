@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import {Icon, ListItem, Button} from 'react-native-elements';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
-import {useDimensions} from '@react-native-community/hooks';
+import {useDimensions, useKeyboard} from '@react-native-community/hooks';
+import {useIsFocused} from '@react-navigation/native';
 import {iconsRooms} from '../../common/ComponentsUtils';
 import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
 
@@ -26,22 +27,27 @@ export default function MainView({navigation, route}) {
   });
   const [rooms, getRooms] = useState([]);
   const {width, height} = useDimensions().window;
+  const keyboard = useKeyboard();
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    setLoading(true);
-    if (route.params != null && route.params.addIndicator) {
-      addItem('rooms', rooms, route.params.newRooms).then(value => {
-        getRooms(value);
-        setLoading(false);
-      });
-    } else {
-      getAllData('rooms').then(value => {
-        getRooms(value);
-        setLoading(false);
-      });
+    if (isFocused) {
+      setLoading(true);
+      if (route.params != null && route.params.addIndicator) {
+        addItem('rooms', rooms, route.params.newRooms).then(value => {
+          getRooms(value);
+          setLoading(false);
+        });
+        route.params = null;
+      } else {
+        getAllData('rooms').then(value => {
+          getRooms(value);
+          setLoading(false);
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.params]);
+  }, [route.params, isFocused]);
 
   useLayoutEffect(() => {
     if (!longPress.indicator) {
@@ -244,7 +250,9 @@ export default function MainView({navigation, route}) {
             style={[
               modalStyle.modelComponentsContainer,
               {
-                marginBottom: height * 0.05,
+                marginBottom: keyboard.keyboardShown
+                  ? height * 0.05
+                  : height * 0.2,
                 width: width * 0.9,
               },
             ]}>

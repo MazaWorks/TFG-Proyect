@@ -48,7 +48,7 @@ export function getDevicesbyRoom(roomName) {
       return toret;
     })
     .catch(error => {
-      console.log(error);
+      console.log('Error: ' + error.message);
     });
 }
 
@@ -155,7 +155,7 @@ export async function addItem(name, array, item) {
 }
 
 export async function deleteItem(name, array, item) {
-  var addDevices = false;
+  var addPlus = false;
   var index = array.indexOf(item);
   if (index >= 0) {
     array.splice(index, 1);
@@ -165,21 +165,41 @@ export async function deleteItem(name, array, item) {
         for (let device of devices) {
           if (device.room != null && device.room === item.name) {
             device.room = null;
-            addDevices = true;
+            addPlus = true;
           }
         }
       }
-    }
-    return AsyncStorage.setItem(name, JSON.stringify(array))
-      .then(() => {
-        if (addDevices) {
-          AsyncStorage.setItem('devices', JSON.stringify(devices));
+      return AsyncStorage.setItem(name, JSON.stringify(array))
+        .then(() => {
+          if (addPlus) {
+            AsyncStorage.setItem('devices', JSON.stringify(devices));
+          }
+          return array;
+        })
+        .catch(error => {
+          console.log('Error: ' + error.message);
+        });
+    } else if (name === 'devices') {
+      var rooms = await getAllData('rooms');
+      if (rooms.length !== 0) {
+        for (let room of rooms) {
+          if (room.name != null && room.name === item.room) {
+            room.numberDevices--;
+            addPlus = true;
+          }
         }
-        return array;
-      })
-      .catch(error => {
-        console.log('Error: ' + error.message);
-      });
+      }
+      return AsyncStorage.setItem(name, JSON.stringify(array))
+        .then(() => {
+          if (addPlus) {
+            AsyncStorage.setItem('rooms', JSON.stringify(rooms));
+          }
+          return array;
+        })
+        .catch(error => {
+          console.log('Error: ' + error.message);
+        });
+    }
   } else {
     return array;
   }

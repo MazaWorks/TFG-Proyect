@@ -78,14 +78,23 @@ export default function SearchingDevices({navigation}) {
     });
 
     socket.on('message', function(data, rinfo) {
-      devicesFound.push({
-        name: 'MedidorTemperatura',
-        ip: rinfo.address,
-        room: 'Bedroom',
-        idDevice: JSON.parse(
-          String.fromCharCode.apply(null, new Uint8Array(data)),
-        ).idDevice,
-      });
+      var add = true;
+      for (let dev of devicesFound) {
+        if (dev.ip === rinfo.address) {
+          add = false;
+          break;
+        }
+      }
+      if (add) {
+        devicesFound.push({
+          name: 'MedidorTemperatura',
+          ip: rinfo.address,
+          room: 'Bedroom',
+          idDevice: JSON.parse(
+            String.fromCharCode.apply(null, new Uint8Array(data)),
+          ).idDevice,
+        });
+      }
     });
 
     const interval = setInterval(() => {
