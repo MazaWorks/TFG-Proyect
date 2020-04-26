@@ -115,16 +115,22 @@ export async function addDeviceToRoom(room, devices, items) {
 export async function addItem(name, array, item) {
   var newValue = Object.assign([], array);
   var addDevices = false;
+  var diffName = 0;
   if (name === 'devices') {
     for (var elements of item) {
       var add = true;
       for (var elements2 of newValue) {
-        if (elements.ip === elements2.ip) {
+        if (elements.id === elements2.id) {
           add = false;
           break;
+        } else if (elements.name === elements2.name.split('_')[0]) {
+          diffName++;
         }
       }
       if (add) {
+        if (diffName) {
+          elements.name = elements.name + '_' + (diffName + 1);
+        }
         newValue.push(elements);
         addDevices = true;
       }

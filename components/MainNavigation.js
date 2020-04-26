@@ -5,12 +5,13 @@ import {
   DrawerItemList,
 } from '@react-navigation/drawer';
 import {Icon} from 'react-native-elements';
-import HabitacionesNavigation from './views/HabitacionView/HabitacionesNavigation';
-import SearchDevicesNavigation from './views/SearchDevices/SearchDevicesNavigation';
+import RoomsNavigation from './views/ModuloRooms/RoomsNavigation';
+import DevicesNavigation from './views/ModuloDevices/DevicesNavigation';
+import RulesNavigation from './views/ModuloRules/RulesNavigation';
 import {View, Text, Image, StyleSheet} from 'react-native';
 
 const Drawer = createDrawerNavigator();
-const INITIAL_ROUTE_NAME = 'Habitaciones';
+const INITIAL_ROUTE_NAME = 'Rules';
 
 export default function MainNavigation() {
   return (
@@ -22,7 +23,7 @@ export default function MainNavigation() {
       drawerContent={props => <CustomDrawerContent {...props} />}>
       <Drawer.Screen
         name="Habitaciones"
-        component={HabitacionesNavigation}
+        component={RoomsNavigation}
         options={{
           title: 'Rooms',
           drawerIcon: ({color}) => <Icon name="weekend" color={color} />,
@@ -30,10 +31,24 @@ export default function MainNavigation() {
       />
       <Drawer.Screen
         name="Dispositivos"
-        component={SearchDevicesNavigation}
+        component={DevicesNavigation}
         options={{
           title: 'Devices',
           drawerIcon: ({color}) => <Icon name="cast" color={color} />,
+        }}
+      />
+      <Drawer.Screen
+        name="Rules"
+        component={RulesNavigation}
+        options={{
+          title: 'Automation',
+          drawerIcon: ({color}) => (
+            <Icon
+              name="home-automation"
+              type="material-community"
+              color={color}
+            />
+          ),
         }}
       />
     </Drawer.Navigator>

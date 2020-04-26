@@ -7,11 +7,11 @@ import TypeRoom from './TypeRoom';
 import AddDevices from './AddDevices';
 import AddRoom from './AddRoom';
 import RoomView from './RoomView';
-import DeviceView from '../SearchDevices/DeviceView';
+import DeviceView from '../ModuloDevices/DeviceView';
 
 const Stack = createStackNavigator();
 
-export default function HabitacionesNavigation({navigation}) {
+export default function RoomsNavigation({navigation}) {
   return (
     <Stack.Navigator>
       <Stack.Screen

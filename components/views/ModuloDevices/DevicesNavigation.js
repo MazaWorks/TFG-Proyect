@@ -9,7 +9,7 @@ import SearchingDevices from './SearchingDevices';
 const Stack = createStackNavigator();
 const INITIAL_ROUTE_NAME = 'Devices';
 
-export default function SearchDevicesNavigation({navigation}) {
+export default function DevicesNavigation({navigation}) {
   return (
     <Stack.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
       <Stack.Screen

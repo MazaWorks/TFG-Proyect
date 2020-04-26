@@ -25,3 +25,31 @@ export function imagesDevices(idDevice) {
       return require('../../assets/Devices/DHT22.jpg');
   }
 }
+
+export function nameDevices(idDevice) {
+  switch (idDevice) {
+    case 1:
+      return 'MedidorTemperatura';
+  }
+}
+
+export function medidores(idDevice) {
+  switch (idDevice) {
+    case 1:
+      return [
+        {description: 'More than ?º'},
+        {description: 'Less than ?º'},
+        {description: 'More than ?%'},
+        {description: 'Less than ?%'},
+      ];
+  }
+}
+
+export function actuadores(idDevice) {
+  switch (idDevice) {
+    case 0:
+      return [{id: 1, description: 'Wait ?minutes'}];
+    case 2:
+      return [{id: 1, description: 'Turn ?'}, {id: 2, description: 'Less ?'}];
+  }
+}

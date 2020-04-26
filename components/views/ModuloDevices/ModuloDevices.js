@@ -90,7 +90,7 @@ export default function MainView({navigation, route}) {
           {
             width: width * 0.8,
             backgroundColor:
-              longPress.indicator && longPress.data.ip === data.ip
+              longPress.indicator && longPress.data.id === data.id
                 ? 'rgba(0,0,0,0.2)'
                 : 'white',
           },
