@@ -124,12 +124,14 @@ export async function addItem(name, array, item) {
           add = false;
           break;
         } else if (elements.name === elements2.name.split('_')[0]) {
-          diffName++;
+          diffName = !Number.isNaN(Number(elements2.name.split('_')[1]))
+            ? Number(elements2.name.split('_')[1]) + 1
+            : 2;
         }
       }
       if (add) {
         if (diffName) {
-          elements.name = elements.name + '_' + (diffName + 1);
+          elements.name = elements.name + '_' + diffName;
         }
         newValue.push(elements);
         addDevices = true;

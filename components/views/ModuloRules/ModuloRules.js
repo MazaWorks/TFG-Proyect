@@ -12,17 +12,29 @@ import {
 import {Icon, Button} from 'react-native-elements';
 import {useDimensions} from '@react-native-community/hooks';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
+import {imagesDevices} from '../../common/ComponentsUtils';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(false);
   const [rules, getRules] = useState([
     {
-      if: {device: 1, id: 1, description: 'More than ?º', value: 22},
-      then: {device: 1, id: 1, description: 'Turn ?', value: 'On'},
-    },
-    {
-      if: {device: 1, id: 2, description: 'Less than ?º', value: 24},
-      then: {device: 1, id: 2, description: 'Turn ?', value: 'Off'},
+      if: {
+        device: {id: 1, type: 1, name: 'Medidor', room: 'Bedroom'},
+        rule: {id: 1, description: 'More than ?º', value: 22},
+      },
+      then: [
+        {
+          device: {id: 2, type: 1, name: 'Calefactor_2', room: 'Bedroom'},
+          rule: {id: 1, description: 'Turn ?', value: 'On'},
+        },
+        {
+          rule: {id: 0, description: 'Wait ?minutes', value: 20},
+        },
+        {
+          device: {id: 2, type: 1, name: 'Calefactor_3', room: 'Bedroom'},
+          rule: {id: 1, description: 'Turn ?', value: 'Off'},
+        },
+      ],
     },
   ]);
   const {width, height} = useDimensions().window;
@@ -40,6 +52,7 @@ export default function MainView({navigation, route}) {
   });
 
   const Item = ({data}) => {
+    var srcImage = imagesDevices(data.if.device.type);
     return (
       <TouchableOpacity
         style={[
@@ -47,11 +60,70 @@ export default function MainView({navigation, route}) {
           {
             width: width * 0.8,
           },
-        ]}>
-        <Text style={listStyles.name}>
-          if "{data.if.description.replace('?', data.if.value)}" then "
-          {data.then.description.replace('?', data.then.value)}"
-        </Text>
+        ]}
+        onPress={() => navigation.navigate('RuleView', {data: data})}>
+        <View>
+          <View style={listStyles.deviceContainer}>
+            <Image
+              source={srcImage}
+              style={[
+                listStyles.image,
+                {
+                  width: (width * 0.8) / 8,
+                  height: (width * 0.8) / 8,
+                },
+              ]}
+              resizeMode="contain"
+            />
+            <View style={{width: (width * 0.8) / 5}}>
+              <Text style={listStyles.deviceName}>{data.if.device.name}</Text>
+              <Text style={listStyles.deviceRoom}>
+                On {data.if.device.room}
+              </Text>
+            </View>
+          </View>
+          <Text style={listStyles.name}>
+            {data.if.rule.description.replace('?', data.if.rule.value)}
+          </Text>
+        </View>
+        <Text style={listStyles.arrow}>></Text>
+        <View>
+          {data.then[0].device != null ? (
+            <View style={listStyles.deviceContainer}>
+              <Image
+                source={srcImage}
+                style={[
+                  listStyles.image,
+                  {
+                    width: (width * 0.8) / 8,
+                    height: (width * 0.8) / 8,
+                  },
+                ]}
+                resizeMode="contain"
+              />
+              <View style={{width: (width * 0.8) / 5}}>
+                <Text style={listStyles.deviceName}>
+                  {data.then[0].device.name}
+                </Text>
+                <Text style={listStyles.deviceRoom}>
+                  On {data.then[0].device.room}
+                </Text>
+              </View>
+            </View>
+          ) : null}
+          <Text style={listStyles.name}>
+            {data.then[0].rule.description.replace(
+              '?',
+              data.then[0].rule.value,
+            )}
+          </Text>
+        </View>
+        {data.then.length > 1 ? (
+          <View style={{flexDirection: 'row'}}>
+            <Text style={listStyles.arrow}>></Text>
+            <Text style={listStyles.arrow}>...</Text>
+          </View>
+        ) : null}
       </TouchableOpacity>
     );
   };
@@ -105,7 +177,7 @@ export default function MainView({navigation, route}) {
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
             title="Find Devices"
-            onPress={() => navigation.navigate('SearchingDevices')}
+            onPress={() => navigation.navigate('RuleView')}
           />
         </View>
       </View>
@@ -122,7 +194,7 @@ export default function MainView({navigation, route}) {
             marginBottom: height * 0.05,
           },
         ]}>
-        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Device</Text>
+        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Edit a Rule</Text>
       </View>
       <OptimizedFlatList
         style={{
@@ -135,6 +207,11 @@ export default function MainView({navigation, route}) {
         keyExtractor={(item, index) => index.toString()}
         numColumns={1}
       />
+      <TouchableOpacity
+        style={listStyles.addRoom}
+        onPress={() => navigation.navigate('AddRule')}>
+        <Icon name="add" type="material" color="#ffc400" size={40} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -149,11 +226,41 @@ const listStyles = StyleSheet.create({
     backgroundColor: '#fff',
     flexDirection: 'row',
     alignContent: 'center',
+    alignItems: 'center',
     padding: 10,
+  },
+  deviceContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  deviceName: {
+    fontSize: 9,
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+  },
+  deviceRoom: {
+    fontSize: 8,
+    fontStyle: 'italic',
+    fontWeight: 'bold',
   },
   name: {
     fontSize: 12,
     fontWeight: 'bold',
+    alignSelf: 'center',
+  },
+  arrow: {
+    margin: 5,
+    fontSize: 25,
+    fontWeight: 'bold',
+  },
+  addRoom: {
+    position: 'absolute',
+    right: '5%',
+    bottom: '5%',
+    backgroundColor: '#83c965',
+    padding: 10,
+    borderRadius: 100,
+    justifyContent: 'center',
   },
 });
 

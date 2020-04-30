@@ -22,7 +22,7 @@ export default function MainNavigation() {
       drawerStyle={styles.drawerStyle}
       drawerContent={props => <CustomDrawerContent {...props} />}>
       <Drawer.Screen
-        name="Habitaciones"
+        name="Rooms"
         component={RoomsNavigation}
         options={{
           title: 'Rooms',
@@ -30,7 +30,7 @@ export default function MainNavigation() {
         }}
       />
       <Drawer.Screen
-        name="Dispositivos"
+        name="Devices"
         component={DevicesNavigation}
         options={{
           title: 'Devices',

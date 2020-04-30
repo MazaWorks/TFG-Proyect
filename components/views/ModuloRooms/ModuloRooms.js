@@ -21,7 +21,7 @@ import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [rename, setRename] = useState({indicator: false});
-  const [longPress, onLongPress] = useState({
+  const [longPress, doLongPress] = useState({
     indicator: false,
     data: {},
   });
@@ -69,7 +69,7 @@ export default function MainView({navigation, route}) {
           <TouchableOpacity
             style={styles.iconHeaderContainer}
             onPress={() =>
-              onLongPress({
+              doLongPress({
                 indicator: false,
                 data: {},
               })
@@ -110,7 +110,7 @@ export default function MainView({navigation, route}) {
               : navigation.navigate('RoomView', {data: data})
           }
           onLongPress={() => {
-            onLongPress({indicator: true, data: data});
+            doLongPress({indicator: true, data: data});
           }}
         />
       </TouchableOpacity>
@@ -206,7 +206,7 @@ export default function MainView({navigation, route}) {
             style={optionsMenu.iconsContainer}
             onPress={() => {
               navigation.navigate('AddDevice', {data: longPress.data});
-              onLongPress({
+              doLongPress({
                 indicator: false,
                 data: {},
               });
@@ -229,7 +229,7 @@ export default function MainView({navigation, route}) {
               var array = Object.assign([], rooms);
               deleteItem('rooms', array, longPress.data).then(value => {
                 getRooms(value);
-                onLongPress({
+                doLongPress({
                   indicator: false,
                   data: {},
                 });
@@ -277,7 +277,7 @@ export default function MainView({navigation, route}) {
                 activeOpacity={rename.name !== longPress.data.name ? 0.2 : 1}
                 onPress={() => {
                   setRename({indicator: false});
-                  onLongPress({
+                  doLongPress({
                     indicator: false,
                     data: {},
                   });

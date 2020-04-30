@@ -58,7 +58,7 @@ export default function MainView({navigation, route}) {
   });
 
   const Item = ({data}) => {
-    var srcImage = imagesDevices(data.idDevice);
+    var srcImage = imagesDevices(data.type);
     return (
       <TouchableOpacity
         style={[

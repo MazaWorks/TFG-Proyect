@@ -7,11 +7,10 @@ import DeviceView from './DeviceView';
 import SearchingDevices from './SearchingDevices';
 
 const Stack = createStackNavigator();
-const INITIAL_ROUTE_NAME = 'Devices';
 
 export default function DevicesNavigation({navigation}) {
   return (
-    <Stack.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
+    <Stack.Navigator initialRouteName="Devices">
       <Stack.Screen
         name="Devices"
         component={MainView}

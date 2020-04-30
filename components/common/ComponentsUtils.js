@@ -19,37 +19,35 @@ export function iconsRooms(type) {
   }
 }
 
-export function imagesDevices(idDevice) {
-  switch (idDevice) {
+export function imagesDevices(type) {
+  switch (type) {
     case 1:
       return require('../../assets/Devices/DHT22.jpg');
   }
 }
 
-export function nameDevices(idDevice) {
-  switch (idDevice) {
+export function nameDefaultDevices(type) {
+  switch (type) {
     case 1:
       return 'MedidorTemperatura';
   }
 }
 
-export function medidores(idDevice) {
-  switch (idDevice) {
+export function devicesRules(type) {
+  switch (type) {
+    case 0:
+      return [{type: 1, description: 'Wait ?minutes'}];
     case 1:
       return [
-        {description: 'More than ?º'},
-        {description: 'Less than ?º'},
-        {description: 'More than ?%'},
-        {description: 'Less than ?%'},
+        {id: 1, type: 1, description: 'More than ?º (Temperature)'},
+        {id: 2, type: 1, description: 'Less than ?º (Temperature)'},
+        {id: 3, type: 1, description: 'More than ?% (Humidity)'},
+        {id: 4, type: 1, description: 'Less than ?% (Humidity)'},
       ];
-  }
-}
-
-export function actuadores(idDevice) {
-  switch (idDevice) {
-    case 0:
-      return [{id: 1, description: 'Wait ?minutes'}];
     case 2:
-      return [{id: 1, description: 'Turn ?'}, {id: 2, description: 'Less ?'}];
+      return [
+        {id: 1, type: 0, description: 'Turn On'},
+        {id: 2, type: 0, description: 'Turn Off'},
+      ];
   }
 }

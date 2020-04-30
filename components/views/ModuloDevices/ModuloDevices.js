@@ -22,7 +22,7 @@ export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, getDevices] = useState([]);
   const [rename, setRename] = useState({indicator: false});
-  const [longPress, onLongPress] = useState({
+  const [longPress, doLongPress] = useState({
     indicator: false,
     data: {},
   });
@@ -59,7 +59,7 @@ export default function MainView({navigation, route}) {
           <TouchableOpacity
             style={noDeviceStyles.iconHeaderContainer}
             onPress={() =>
-              onLongPress({
+              doLongPress({
                 indicator: false,
                 data: {},
               })
@@ -82,7 +82,7 @@ export default function MainView({navigation, route}) {
   }, [devices, longPress, navigation]);
 
   const Item = ({data}) => {
-    var srcImage = imagesDevices(data.idDevice);
+    var srcImage = imagesDevices(data.type);
     return (
       <TouchableOpacity
         style={[
@@ -101,7 +101,7 @@ export default function MainView({navigation, route}) {
             : navigation.navigate('DeviceView', {device: data})
         }
         onLongPress={() => {
-          onLongPress({indicator: true, data: data});
+          doLongPress({indicator: true, data: data});
         }}>
         <Image
           source={srcImage}
@@ -227,7 +227,7 @@ export default function MainView({navigation, route}) {
               var array = Object.assign([], devices);
               deleteItem('devices', array, longPress.data).then(value => {
                 getDevices(value);
-                onLongPress({
+                doLongPress({
                   indicator: false,
                   data: {},
                 });
@@ -275,7 +275,7 @@ export default function MainView({navigation, route}) {
                 activeOpacity={rename.name !== longPress.data.name ? 0.2 : 1}
                 onPress={() => {
                   setRename({indicator: false});
-                  onLongPress({
+                  doLongPress({
                     indicator: false,
                     data: {},
                   });

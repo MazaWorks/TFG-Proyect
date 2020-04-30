@@ -6,7 +6,7 @@ import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {CircleSnail} from 'react-native-progress';
 import {useDimensions} from '@react-native-community/hooks';
 import {imagesDevices} from '../../common/ComponentsUtils';
-import {nameDevices} from '../../common/ComponentsUtils';
+import {nameDefaultDevices} from '../../common/ComponentsUtils';
 import dgram from 'dgram';
 
 export default function SearchingDevices({navigation}) {
@@ -43,7 +43,7 @@ export default function SearchingDevices({navigation}) {
   }, [devices, navigation]);
 
   const renderItem = ({item}) => {
-    var srcImage = imagesDevices(item.idDevice);
+    var srcImage = imagesDevices(item.type);
     return (
       <TouchableOpacity>
         <View
@@ -76,8 +76,6 @@ export default function SearchingDevices({navigation}) {
       var msg = toByteArray('?');
       socket.send(msg, 0, msg.length, 8080, '192.168.0.255');
       socket.send(msg, 0, msg.length, 8080, '192.168.0.255');
-      socket.send(msg, 0, msg.length, 8080, '192.168.0.255');
-      socket.send(msg, 0, msg.length, 8080, '192.168.0.255');
     });
 
     socket.on('message', function(data, rinfo) {
@@ -95,8 +93,8 @@ export default function SearchingDevices({navigation}) {
         devicesFound.push({
           id: json.id,
           ip: rinfo.address,
-          idDevice: json.idDevice,
-          name: nameDevices(json.idDevice),
+          type: json.idDevice,
+          name: nameDefaultDevices(json.idDevice),
         });
       }
     });
