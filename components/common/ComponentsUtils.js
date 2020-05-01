@@ -21,6 +21,8 @@ export function iconsRooms(type) {
 
 export function imagesDevices(type) {
   switch (type) {
+    case 0:
+      return require('../../assets/Devices/clock.png');
     case 1:
       return require('../../assets/Devices/DHT22.jpg');
   }
@@ -36,18 +38,18 @@ export function nameDefaultDevices(type) {
 export function devicesRules(type) {
   switch (type) {
     case 0:
-      return [{type: 1, description: 'Wait ?minutes'}];
+      return [{id: 0, keyboardType: 1, description: 'Wait ? minutes'}];
     case 1:
       return [
-        {id: 1, type: 1, description: 'More than ?º (Temperature)'},
-        {id: 2, type: 1, description: 'Less than ?º (Temperature)'},
-        {id: 3, type: 1, description: 'More than ?% (Humidity)'},
-        {id: 4, type: 1, description: 'Less than ?% (Humidity)'},
+        {id: 1, keyboardType: 1, description: 'More than ?º (Temperature)'},
+        {id: 2, keyboardType: 1, description: 'Less than ?º (Temperature)'},
+        {id: 3, keyboardType: 1, description: 'More than ?% (Humidity)'},
+        {id: 4, keyboardType: 1, description: 'Less than ?% (Humidity)'},
       ];
     case 2:
       return [
-        {id: 1, type: 0, description: 'Turn On'},
-        {id: 2, type: 0, description: 'Turn Off'},
+        {id: 1, keyboardType: 0, description: 'Turn On'},
+        {id: 2, keyboardType: 0, description: 'Turn Off'},
       ];
   }
 }

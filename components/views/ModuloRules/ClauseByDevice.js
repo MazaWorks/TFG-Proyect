@@ -106,7 +106,10 @@ export default function MainView({navigation, route}) {
               style={modalStyle.textInput}
               textAlign="center"
               textContentType="name"
-              keyboardType={value.condition.type === 1 ? 'numeric' : 'default'}
+              maxLength={4}
+              keyboardType={
+                value.condition.keyboardType === 1 ? 'numeric' : 'default'
+              }
               onChangeText={text => {
                 getValue({...value, name: text});
               }}
@@ -133,7 +136,10 @@ export default function MainView({navigation, route}) {
                   });
                   navigation.navigate('AddRule', {
                     if: route.params.if,
-                    device: route.params.device,
+                    deviceId:
+                      route.params.device.type === 0
+                        ? 0
+                        : route.params.device.id,
                     condition: {
                       id: value.condition.id,
                       description: value.condition.description.split('(')[0],
@@ -209,14 +215,16 @@ const listStyles = StyleSheet.create({
     padding: 2,
     justifyContent: 'center',
     backgroundColor: 'white',
+    borderBottomWidth: 2,
+    borderColor: 'gainsboro',
   },
   mainContainer: {
     backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
-    borderColor: 'beige',
-    borderWidth: 1,
     padding: 10,
+    borderBottomWidth: 1,
+    borderColor: 'gainsboro',
   },
   name: {
     fontSize: 12,

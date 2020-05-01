@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -12,13 +12,25 @@ import {
 } from 'react-native';
 import {useDimensions} from '@react-native-community/hooks';
 import {imagesDevices} from '../../common/ComponentsUtils';
+import {getDevicebyRule} from '../../common/Dao';
 
 export default function RuleView({navigation, route}) {
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(true);
+  const [devices, setDevices] = useState(new Map());
   const {width, height} = useDimensions().window;
 
+  useEffect(() => {
+    setLoading(true);
+    getDevicebyRule([route.params.data], false).then(value => {
+      setDevices(value);
+      setLoading(false);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const Measurer = ({measurer}) => {
-    var srcImage = imagesDevices(measurer.device.type);
+    var device = devices.get(measurer.deviceId);
+    var srcImage = imagesDevices(device.type);
     return (
       <TouchableOpacity
         style={[
@@ -40,14 +52,16 @@ export default function RuleView({navigation, route}) {
             resizeMode="contain"
           />
           <View style={[listStyles.devicesInfo, {width: width * 0.15}]}>
-            <Text style={listStyles.deviceName}>{measurer.device.name}</Text>
-            <Text style={listStyles.deviceRoom}>On {measurer.device.room}</Text>
+            <Text style={listStyles.deviceName}>{device.name}</Text>
+            <Text style={listStyles.deviceRoom}>
+              {device.room != null ? 'On ' + device.room : 'Not Assigned'}
+            </Text>
           </View>
         </View>
         <Text style={listStyles.name}>:</Text>
         <View>
           <Text style={listStyles.name}>
-            {measurer.rule.description.replace('?', measurer.rule.value)}
+            {measurer.description.replace('?', measurer.value)}
           </Text>
         </View>
       </TouchableOpacity>
@@ -56,8 +70,9 @@ export default function RuleView({navigation, route}) {
 
   const Actuators = ({actuators}) => {
     return actuators.map((act, key) => {
-      if (act.device != null) {
-        var srcImage = imagesDevices(act.device.type);
+      if (act.deviceId != null) {
+        var device = devices.get(act.deviceId);
+        var srcImage = imagesDevices(device.type);
       }
       return (
         <TouchableOpacity
@@ -65,11 +80,11 @@ export default function RuleView({navigation, route}) {
           style={[
             listStyles.mainContainer,
             {
-              flexDirection: act.device != null ? 'row' : 'column',
+              flexDirection: act.deviceId != null ? 'row' : 'column',
               width: width * 0.8,
             },
           ]}>
-          {act.device != null ? (
+          {act.deviceId != null ? (
             <View
               style={{
                 flexDirection: 'row',
@@ -88,9 +103,9 @@ export default function RuleView({navigation, route}) {
                   resizeMode="contain"
                 />
                 <View style={[listStyles.devicesInfo, {width: width * 0.15}]}>
-                  <Text style={listStyles.deviceName}>{act.device.name}</Text>
+                  <Text style={listStyles.deviceName}>{device.name}</Text>
                   <Text style={listStyles.deviceRoom}>
-                    On {act.device.room}
+                    {device.room != null ? 'On ' + device.room : 'Not Assigned'}
                   </Text>
                 </View>
               </View>
@@ -99,7 +114,7 @@ export default function RuleView({navigation, route}) {
           ) : null}
           <View style={{alignSelf: 'center'}}>
             <Text style={listStyles.name}>
-              {act.rule.description.replace('?', act.rule.value)}
+              {act.description.replace('?', act.value)}
             </Text>
           </View>
         </TouchableOpacity>
@@ -150,8 +165,8 @@ const listStyles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     paddingLeft: 0,
-    borderWidth: 1,
-    borderColor: 'lightgrey',
+    borderBottomWidth: 1,
+    borderColor: 'gainsboro',
   },
   if: {
     padding: 5,

@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useLayoutEffect} from 'react';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
 import {
   View,
   Text,
@@ -11,61 +11,113 @@ import {
 } from 'react-native';
 import {Icon, Button} from 'react-native-elements';
 import {useDimensions} from '@react-native-community/hooks';
+import {useIsFocused} from '@react-navigation/native';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {imagesDevices} from '../../common/ComponentsUtils';
+import {
+  getAllData,
+  getDevicebyRule,
+  addItem,
+  deleteItem,
+} from '../../common/Dao';
 
 export default function MainView({navigation, route}) {
-  const [isLoading, setLoading] = useState(false);
-  const [rules, getRules] = useState([
-    {
-      if: {
-        device: {id: 1, type: 1, name: 'Medidor', room: 'Bedroom'},
-        rule: {id: 1, description: 'More than ?º', value: 22},
-      },
-      then: [
-        {
-          device: {id: 2, type: 1, name: 'Calefactor_2', room: 'Bedroom'},
-          rule: {id: 1, description: 'Turn ?', value: 'On'},
-        },
-        {
-          rule: {id: 0, description: 'Wait ?minutes', value: 20},
-        },
-        {
-          device: {id: 2, type: 1, name: 'Calefactor_3', room: 'Bedroom'},
-          rule: {id: 1, description: 'Turn ?', value: 'Off'},
-        },
-      ],
-    },
-  ]);
+  const [isLoading, setLoading] = useState(true);
+  const [devices, setDevices] = useState(new Map());
+  const [rules, getRules] = useState([]);
+  const [longPress, doLongPress] = useState({
+    indicator: false,
+    data: {},
+  });
   const {width, height} = useDimensions().window;
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      setLoading(true);
+      if (route.params != null && route.params.addIndicator) {
+        addItem('rules', rules, route.params.rule).then(value => {
+          getDevicebyRule(value, false).then(value2 => {
+            setDevices(value2);
+            getRules(value);
+            setLoading(false);
+          });
+        });
+        route.params = null;
+      } else {
+        getAllData('rules').then(value => {
+          getDevicebyRule(value, false).then(value2 => {
+            setDevices(value2);
+            getRules(value);
+            setLoading(false);
+          });
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params, isFocused]);
 
   useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity
-          style={noDeviceStyles.iconHeaderContainer}
-          onPress={() => navigation.openDrawer()}>
-          <Icon name="menu" size={30} />
-        </TouchableOpacity>
-      ),
-    });
-  });
+    if (longPress.indicator) {
+      navigation.setOptions({
+        headerLeftContainerStyle: {marginLeft: '5%'},
+        headerLeft: () => (
+          <TouchableOpacity
+            style={noDeviceStyles.iconHeaderContainer}
+            onPress={() =>
+              doLongPress({
+                indicator: false,
+                data: {},
+              })
+            }>
+            <Icon name="close" size={30} />
+          </TouchableOpacity>
+        ),
+      });
+    } else {
+      navigation.setOptions({
+        headerLeft: () => (
+          <TouchableOpacity
+            style={noDeviceStyles.iconHeaderContainer}
+            onPress={() => navigation.openDrawer()}>
+            <Icon name="menu" size={30} />
+          </TouchableOpacity>
+        ),
+      });
+    }
+  }, [devices, longPress, navigation]);
 
-  const Item = ({data}) => {
-    var srcImage = imagesDevices(data.if.device.type);
+  const Item = ({data, index}) => {
+    var deviceIf = devices.get(data.if.deviceId);
+    var srcImageif = imagesDevices(deviceIf.type);
+    if (data.then[0].deviceId != null) {
+      var deviceThen = devices.get(data.then[0].deviceId);
+      var srcImagethen = imagesDevices(deviceThen.type);
+    }
     return (
       <TouchableOpacity
         style={[
           listStyles.mainContainer,
           {
             width: width * 0.8,
+            backgroundColor:
+              longPress.indicator && longPress.index === index
+                ? 'rgba(0,0,0,0.2)'
+                : 'white',
           },
         ]}
-        onPress={() => navigation.navigate('RuleView', {data: data})}>
+        onPress={() =>
+          longPress.indicator
+            ? null
+            : navigation.navigate('RuleView', {data: data})
+        }
+        onLongPress={() => {
+          doLongPress({indicator: true, data: data, index: index});
+        }}>
         <View>
           <View style={listStyles.deviceContainer}>
             <Image
-              source={srcImage}
+              source={srcImageif}
               style={[
                 listStyles.image,
                 {
@@ -76,22 +128,22 @@ export default function MainView({navigation, route}) {
               resizeMode="contain"
             />
             <View style={{width: (width * 0.8) / 5}}>
-              <Text style={listStyles.deviceName}>{data.if.device.name}</Text>
+              <Text style={listStyles.deviceName}>{deviceIf.name}</Text>
               <Text style={listStyles.deviceRoom}>
-                On {data.if.device.room}
+                {deviceIf.room != null ? 'On ' + deviceIf.room : 'Not Assigned'}
               </Text>
             </View>
           </View>
           <Text style={listStyles.name}>
-            {data.if.rule.description.replace('?', data.if.rule.value)}
+            {data.if.description.replace('?', data.if.value)}
           </Text>
         </View>
         <Text style={listStyles.arrow}>></Text>
         <View>
-          {data.then[0].device != null ? (
+          {data.then[0].deviceId != null ? (
             <View style={listStyles.deviceContainer}>
               <Image
-                source={srcImage}
+                source={srcImagethen}
                 style={[
                   listStyles.image,
                   {
@@ -102,20 +154,17 @@ export default function MainView({navigation, route}) {
                 resizeMode="contain"
               />
               <View style={{width: (width * 0.8) / 5}}>
-                <Text style={listStyles.deviceName}>
-                  {data.then[0].device.name}
-                </Text>
+                <Text style={listStyles.deviceName}>{deviceThen.name}</Text>
                 <Text style={listStyles.deviceRoom}>
-                  On {data.then[0].device.room}
+                  {deviceThen.room != null
+                    ? 'On ' + deviceThen.room
+                    : 'Not Assigned'}
                 </Text>
               </View>
             </View>
           ) : null}
           <Text style={listStyles.name}>
-            {data.then[0].rule.description.replace(
-              '?',
-              data.then[0].rule.value,
-            )}
+            {data.then[0].description.replace('?', data.then[0].value)}
           </Text>
         </View>
         {data.then.length > 1 ? (
@@ -177,7 +226,7 @@ export default function MainView({navigation, route}) {
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
             title="Find Devices"
-            onPress={() => navigation.navigate('RuleView')}
+            onPress={() => navigation.navigate('AddRule')}
           />
         </View>
       </View>
@@ -202,16 +251,43 @@ export default function MainView({navigation, route}) {
           marginBottom: height * 0.04,
         }}
         data={rules}
-        renderItem={({item}) => <Item data={item} />}
+        renderItem={({item, index}) => <Item data={item} index={index} />}
         containerStyle={listStyles.mainContainer}
         keyExtractor={(item, index) => index.toString()}
         numColumns={1}
       />
-      <TouchableOpacity
-        style={listStyles.addRoom}
-        onPress={() => navigation.navigate('AddRule')}>
-        <Icon name="add" type="material" color="#ffc400" size={40} />
-      </TouchableOpacity>
+      {!longPress.indicator && (
+        <TouchableOpacity
+          style={listStyles.addRoom}
+          onPress={() => navigation.navigate('AddRule')}>
+          <Icon name="add" type="material" color="#ffc400" size={40} />
+        </TouchableOpacity>
+      )}
+      {longPress.indicator && (
+        <View style={[optionsMenu.container, {height: height * 0.09}]}>
+          <TouchableOpacity style={optionsMenu.iconsContainer}>
+            <Icon name="edit" size={30} />
+            <Text style={optionsMenu.text}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
+              setLoading(true);
+              var array = Object.assign([], rules);
+              deleteItem('rules', array, longPress.data).then(value => {
+                getRules(value);
+                doLongPress({
+                  indicator: false,
+                  data: {},
+                });
+                setLoading(false);
+              });
+            }}>
+            <Icon name="delete" size={30} />
+            <Text style={optionsMenu.text}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -228,6 +304,8 @@ const listStyles = StyleSheet.create({
     alignContent: 'center',
     alignItems: 'center',
     padding: 10,
+    borderBottomWidth: 1,
+    borderColor: 'gainsboro',
   },
   deviceContainer: {
     alignItems: 'center',
@@ -298,5 +376,27 @@ const noDeviceStyles = StyleSheet.create({
   buttonText: {
     fontStyle: 'normal',
     fontSize: 15,
+  },
+});
+
+const optionsMenu = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    width: '100%',
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    backgroundColor: 'white',
+  },
+  iconsContainer: {
+    width: '18%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    fontStyle: 'italic',
+    fontSize: 12,
+    fontWeight: '400',
   },
 });

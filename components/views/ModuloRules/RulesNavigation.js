@@ -12,9 +12,9 @@ const Stack = createStackNavigator();
 
 export default function RulesNavigation({navigation}) {
   return (
-    <Stack.Navigator initialRouteName="Reglas">
+    <Stack.Navigator initialRouteName="ModuloRules">
       <Stack.Screen
-        name="Reglas"
+        name="ModuloRules"
         component={MainView}
         options={{
           title: 'Rules',
@@ -37,7 +37,7 @@ export default function RulesNavigation({navigation}) {
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('Reglas')}>
+              onPress={() => navigation.navigate('ModuloRules')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),
@@ -58,13 +58,6 @@ export default function RulesNavigation({navigation}) {
         component={AddRule}
         options={{
           title: 'New Rule',
-          headerLeft: () => (
-            <TouchableOpacity
-              style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('Reglas')}>
-              <Icon name="arrow-left" type="material-community" />
-            </TouchableOpacity>
-          ),
           headerStyle: {
             backgroundColor: '#00a82a',
           },
@@ -74,7 +67,6 @@ export default function RulesNavigation({navigation}) {
             fontSize: 18,
           },
           headerTitleContainerStyle: {marginLeft: '5%'},
-          headerLeftContainerStyle: {marginLeft: '5%'},
         }}
       />
       <Stack.Screen

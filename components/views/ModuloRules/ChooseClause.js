@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Platform,
 } from 'react-native';
+import {Icon} from 'react-native-elements';
 import {useDimensions} from '@react-native-community/hooks';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {imagesDevices} from '../../common/ComponentsUtils';
@@ -93,11 +94,49 @@ export default function MainView({navigation, route}) {
         style={{fontSize: 15, fontWeight: 'bold', marginBottom: height * 0.03}}>
         {route.params.if ? 'IF...' : 'THEN...'}
       </Text>
+      {!route.params.if ? (
+        <View>
+          <View style={listStyles.listheader}>
+            <Text
+              style={{
+                marginLeft: '10%',
+                fontSize: 10,
+              }}>
+              General Conditions
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[
+              listStyles.mainContainer,
+              {marginBottom: height * 0.01, width: width * 0.8},
+            ]}
+            onPress={() =>
+              navigation.navigate('ClauseByDevice', {
+                device: {
+                  type: 0,
+                },
+                if: route.params.if,
+              })
+            }>
+            <Image
+              source={imagesDevices(0)}
+              style={[
+                listStyles.image,
+                {
+                  width: (width * 0.8) / 6,
+                  height: (width * 0.8) / 6,
+                },
+              ]}
+              resizeMode="contain"
+            />
+            <View style={{width: (width * 0.8 * 4) / 6}}>
+              <Text style={listStyles.name}> Wait a moment</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      ) : null}
       <OptimizedFlatList
-        style={{
-          width: width * 0.8,
-          marginBottom: height * 0.04,
-        }}
+        style={{width: width * 0.8, marginBottom: height * 0.04}}
         data={devices}
         renderItem={({item}) => <Item data={item} />}
         containerStyle={listStyles.mainContainer}
@@ -139,9 +178,15 @@ const listStyles = StyleSheet.create({
     alignContent: 'center',
     alignItems: 'center',
     padding: 10,
+    borderBottomWidth: 1,
+    borderColor: 'gainsboro',
+  },
+  image: {
+    alignSelf: 'center',
+    marginRight: 8,
   },
   name: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: 'bold',
   },
   subtitle: {

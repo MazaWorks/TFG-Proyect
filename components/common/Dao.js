@@ -14,6 +14,40 @@ export function getAllData(item) {
     });
 }
 
+export async function getDevicebyRule(rules, allDevices) {
+  const ids = new Set();
+  if (!allDevices) {
+    for (let rule of rules) {
+      ids.add(rule.if.deviceId);
+      for (let then of rule.then) {
+        if (then.deviceId != null) {
+          ids.add(then.deviceId);
+        }
+      }
+    }
+  }
+  return AsyncStorage.getItem('devices')
+    .then(value => {
+      const toret = new Map();
+      if (value != null && value !== '') {
+        var allData = JSON.parse(value);
+        for (let device of allData) {
+          if (!allDevices) {
+            if (ids.has(device.id)) {
+              toret.set(device.id, device);
+            }
+          } else {
+            toret.set(device.id, device);
+          }
+        }
+      }
+      return toret;
+    })
+    .catch(error => {
+      console.log('Error: ' + error.message);
+    });
+}
+
 export function getDevicesExceptRoom(name) {
   return AsyncStorage.getItem('devices')
     .then(value => {
@@ -116,7 +150,10 @@ export async function addItem(name, array, item) {
   var newValue = Object.assign([], array);
   var addDevices = false;
   var diffName = 0;
-  if (name === 'devices') {
+  if (name === 'rules') {
+    addDevices = true;
+    newValue.push(item);
+  } else if (name === 'devices') {
     for (var elements of item) {
       var add = true;
       for (var elements2 of newValue) {
@@ -165,9 +202,18 @@ export async function addItem(name, array, item) {
 export async function deleteItem(name, array, item) {
   var addPlus = false;
   var index = array.indexOf(item);
+  console.log(index);
   if (index >= 0) {
     array.splice(index, 1);
-    if (name === 'rooms') {
+    if (name === 'rules') {
+      return AsyncStorage.setItem(name, JSON.stringify(array))
+        .then(() => {
+          return array;
+        })
+        .catch(error => {
+          console.log('Error: ' + error.message);
+        });
+    } else if (name === 'rooms') {
       var devices = await getAllData('devices');
       if (devices.length !== 0) {
         for (let device of devices) {
