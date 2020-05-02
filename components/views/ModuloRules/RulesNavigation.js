@@ -3,7 +3,6 @@ import {TouchableOpacity, StyleSheet} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {createStackNavigator} from '@react-navigation/stack';
 import MainView from './ModuloRules';
-import RuleView from './RuleView';
 import AddRule from './AddRule';
 import ClauseByDevice from './ClauseByDevice';
 import ChooseClause from './ChooseClause';
@@ -19,30 +18,7 @@ export default function RulesNavigation({navigation}) {
         options={{
           title: 'Rules',
           headerStyle: {
-            backgroundColor: '#00a82a',
-          },
-          headerTitleStyle: {
-            color: '#fff',
-            fontWeight: 'bold',
-            fontSize: 18,
-          },
-          headerTitleContainerStyle: {marginLeft: '5%'},
-          headerLeftContainerStyle: {marginLeft: '5%'},
-        }}
-      />
-      <Stack.Screen
-        name="RuleView"
-        component={RuleView}
-        options={{
-          headerLeft: () => (
-            <TouchableOpacity
-              style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('ModuloRules')}>
-              <Icon name="arrow-left" type="material-community" />
-            </TouchableOpacity>
-          ),
-          headerStyle: {
-            backgroundColor: '#00a82a',
+            backgroundColor: '#ffc400',
           },
           headerTitleStyle: {
             color: '#fff',
@@ -59,7 +35,7 @@ export default function RulesNavigation({navigation}) {
         options={{
           title: 'New Rule',
           headerStyle: {
-            backgroundColor: '#00a82a',
+            backgroundColor: '#ffc400',
           },
           headerTitleStyle: {
             color: '#fff',
@@ -81,7 +57,7 @@ export default function RulesNavigation({navigation}) {
             </TouchableOpacity>
           ),
           headerStyle: {
-            backgroundColor: '#00a82a',
+            backgroundColor: '#ffc400',
           },
           headerTitleStyle: {
             color: '#fff',
@@ -99,12 +75,12 @@ export default function RulesNavigation({navigation}) {
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('AddRule')}>
+              onPress={() => navigation.navigate('ClauseByDevice')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),
           headerStyle: {
-            backgroundColor: '#00a82a',
+            backgroundColor: '#ffc400',
           },
           headerTitleStyle: {
             color: '#fff',

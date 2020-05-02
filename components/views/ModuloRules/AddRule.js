@@ -20,15 +20,31 @@ export default function MainView({navigation, route}) {
   const [devices, setDevices] = useState(new Map());
   const [measurer, setMeasurer] = useState({});
   const [actuators, setActuators] = useState([]);
+  const [replace] = useState(route.params);
   const [onIf, whereAreWe] = useState(true);
+  const [press, doPress] = useState({
+    indicator: false,
+    data: {},
+  });
   const {width, height} = useDimensions().window;
 
   useEffect(() => {
     setLoading(true);
-    getDevicebyRule(null, true).then(value => {
-      setDevices(value);
-      setLoading(false);
-    });
+    if (replace != null) {
+      setMeasurer(replace.rule.if);
+      setActuators(replace.rule.then);
+      whereAreWe(false);
+      getDevicebyRule([replace.rule], true).then(value => {
+        setDevices(value);
+        setLoading(false);
+      });
+    } else {
+      getDevicebyRule(null, true).then(value => {
+        setDevices(value);
+        setLoading(false);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -44,19 +60,25 @@ export default function MainView({navigation, route}) {
         whereAreWe(false);
       } else {
         var newValue = Object.assign([], actuators);
+        var newActuator;
         if (route.params.deviceId !== 0) {
-          newValue.push({
+          newActuator = {
             id: route.params.condition.id,
             description: route.params.condition.description,
             value: route.params.condition.value,
             deviceId: route.params.deviceId,
-          });
+          };
         } else {
-          newValue.push({
+          newActuator = {
             id: route.params.condition.id,
             description: route.params.condition.description,
             value: route.params.condition.value,
-          });
+          };
+        }
+        if (route.params.index == null) {
+          newValue.push(newActuator);
+        } else {
+          newValue[route.params.index] = newActuator;
         }
         setActuators(newValue);
       }
@@ -67,8 +89,9 @@ export default function MainView({navigation, route}) {
   }, [route.params]);
 
   useLayoutEffect(() => {
-    navigation.setOptions({
+    var header = {
       headerRight: () => {
+        route.params = null;
         var toAdd = false;
         if (actuators.length !== 0) {
           for (let actuator of actuators) {
@@ -77,16 +100,33 @@ export default function MainView({navigation, route}) {
             }
           }
         }
+        toAdd =
+          toAdd &&
+          measurer.id != null &&
+          (replace == null ||
+            (replace != null &&
+              JSON.stringify({if: measurer, then: actuators}) !==
+                JSON.stringify(replace.rule)));
         if (toAdd) {
           return (
             <TouchableOpacity
               style={noDeviceStyles.iconHeaderContainer}
-              onPress={() =>
-                navigation.navigate('ModuloRules', {
-                  rule: {if: measurer, then: actuators},
-                  addIndicator: true,
-                })
-              }>
+              onPress={() => {
+                var toret;
+                if (replace == null) {
+                  toret = {
+                    rule: {if: measurer, then: actuators},
+                    addIndicator: true,
+                  };
+                } else {
+                  toret = {
+                    rule: {if: measurer, then: actuators},
+                    addIndicator: true,
+                    index: replace.index,
+                  };
+                }
+                navigation.navigate('ModuloRules', toret);
+              }}>
               <Icon name="done" size={30} />
             </TouchableOpacity>
           );
@@ -96,61 +136,100 @@ export default function MainView({navigation, route}) {
       },
       headerLeft: () => {
         route.params = null;
-        return (
-          <TouchableOpacity
-            style={noDeviceStyles.iconHeaderContainer}
-            onPress={() => navigation.navigate('ModuloRules')}>
-            <Icon name="arrow-left" type="material-community" />
-          </TouchableOpacity>
-        );
+        if (press.indicator) {
+          return (
+            <TouchableOpacity
+              style={noDeviceStyles.iconHeaderContainer}
+              onPress={() =>
+                doPress({
+                  indicator: false,
+                  data: {},
+                })
+              }>
+              <Icon name="close" size={30} />
+            </TouchableOpacity>
+          );
+        } else {
+          return (
+            <TouchableOpacity
+              style={noDeviceStyles.iconHeaderContainer}
+              onPress={() => navigation.navigate('ModuloRules')}>
+              <Icon name="arrow-left" type="material-community" />
+            </TouchableOpacity>
+          );
+        }
       },
       headerRightContainerStyle: {marginRight: '5%'},
       headerLeftContainerStyle: {marginLeft: '5%'},
-    });
-  }, [actuators, measurer, navigation, onIf, route.params]);
+    };
+    replace != null
+      ? navigation.setOptions({...header, title: 'Rule View'})
+      : navigation.setOptions(header);
+  }, [actuators, measurer, navigation, press.indicator, replace, route.params]);
 
-  const Measurer = ({measurer}) => {
-    var device = devices.get(measurer.deviceId);
-    var srcImage = imagesDevices(device.type);
-    return (
-      <TouchableOpacity
-        style={[
-          listStyles.mainContainer,
-          {
-            width: width * 0.8,
-          },
-        ]}>
-        <View style={listStyles.deviceContainer}>
-          <Image
-            source={srcImage}
-            style={[
-              listStyles.image,
-              {
-                width: (width * 0.8) / 5,
-                height: (width * 0.8) / 5,
-              },
-            ]}
-            resizeMode="contain"
-          />
-          <View style={[listStyles.devicesInfo, {width: width * 0.15}]}>
-            <Text style={listStyles.deviceName}>{device.name}</Text>
-            <Text style={listStyles.deviceRoom}>
-              {device.room != null ? 'On ' + device.room : 'Not Assigned'}
+  const Measurer = ({data}) => {
+    if (data.id != null) {
+      var device = devices.get(data.deviceId);
+      var srcImage = imagesDevices(device.type);
+      return (
+        <TouchableOpacity
+          style={[
+            listStyles.mainContainer,
+            {
+              backgroundColor:
+                press.indicator && press.index === 0
+                  ? 'rgba(0,0,0,0.2)'
+                  : 'white',
+              width: width * 0.9,
+            },
+          ]}
+          onPress={() => {
+            doPress({indicator: true, data: data, index: 0});
+          }}>
+          <View style={listStyles.deviceContainer}>
+            <Image
+              source={srcImage}
+              style={[
+                listStyles.image,
+                {
+                  width: (width * 0.8) / 5,
+                  height: (width * 0.8) / 5,
+                },
+              ]}
+              resizeMode="contain"
+            />
+            <View style={[listStyles.devicesInfo, {width: width * 0.25}]}>
+              <Text style={listStyles.deviceName}>{device.name}</Text>
+              <Text style={listStyles.deviceRoom}>
+                {device.room != null ? device.room : 'Not Assigned'}
+              </Text>
+            </View>
+          </View>
+          <Text style={listStyles.name}>:</Text>
+          <View>
+            <Text style={listStyles.name}>
+              {data.description.replace('?', data.value)}
             </Text>
           </View>
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <View
+          style={[
+            listStyles.mainContainer,
+            {
+              width: width * 0.9,
+            },
+          ]}>
+          <Text style={listStyles.name}>Not If conditions</Text>
         </View>
-        <Text style={listStyles.name}>:</Text>
-        <View>
-          <Text style={listStyles.name}>
-            {measurer.description.replace('?', measurer.value)}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
+      );
+    }
   };
 
-  const Actuators = ({actuators}) => {
-    return actuators.map((act, key) => {
+  const Actuators = ({data}) => {
+    return data.map((act, key) => {
       if (act.deviceId != null) {
         var device = devices.get(act.deviceId);
         var srcImage = imagesDevices(device.type);
@@ -161,10 +240,17 @@ export default function MainView({navigation, route}) {
           style={[
             listStyles.mainContainer,
             {
+              backgroundColor:
+                press.indicator && press.index === key + 1
+                  ? 'rgba(0,0,0,0.2)'
+                  : 'white',
               flexDirection: act.deviceId != null ? 'row' : 'column',
-              width: width * 0.8,
+              width: width * 0.9,
             },
-          ]}>
+          ]}
+          onPress={() => {
+            doPress({indicator: true, data: act, index: key + 1});
+          }}>
           {act.deviceId != null ? (
             <View
               style={{
@@ -183,10 +269,10 @@ export default function MainView({navigation, route}) {
                   ]}
                   resizeMode="contain"
                 />
-                <View style={[listStyles.devicesInfo, {width: width * 0.15}]}>
+                <View style={[listStyles.devicesInfo, {width: width * 0.25}]}>
                   <Text style={listStyles.deviceName}>{device.name}</Text>
                   <Text style={listStyles.deviceRoom}>
-                    {device.room != null ? 'On ' + device.room : 'Not Assigned'}
+                    {device.room != null ? device.room : 'Not Assigned'}
                   </Text>
                 </View>
               </View>
@@ -214,7 +300,7 @@ export default function MainView({navigation, route}) {
     );
   }
 
-  if (onIf) {
+  if (measurer.id == null && actuators.length === 0) {
     return (
       <View style={noDeviceStyles.container}>
         <View
@@ -262,15 +348,59 @@ export default function MainView({navigation, route}) {
           ]}>
           If
         </Text>
-        <Measurer measurer={measurer} />
+        <Measurer data={measurer} />
         <Text style={listStyles.then}>Then</Text>
-        <Actuators actuators={actuators} />
+        <Actuators data={actuators} />
       </ScrollView>
-      <TouchableOpacity
-        style={listStyles.addRoom}
-        onPress={() => navigation.navigate('ChooseClause', {if: onIf})}>
-        <Icon name="add" type="material" color="#ffc400" size={40} />
-      </TouchableOpacity>
+      {!press.indicator && (
+        <TouchableOpacity
+          style={listStyles.addRoom}
+          onPress={() => navigation.navigate('ChooseClause', {if: onIf})}>
+          <Icon name="add" type="material" color="#125c28" size={40} />
+        </TouchableOpacity>
+      )}
+      {press.indicator && (
+        <View style={[optionsMenu.container, {height: height * 0.09}]}>
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
+              doPress({
+                indicator: false,
+                data: {},
+              });
+              navigation.navigate('ChooseClause', {
+                if: onIf,
+                replace: press.index - 1,
+              });
+            }}>
+            <Icon name="edit" size={30} />
+            <Text style={optionsMenu.text}>Replace</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
+              if (press.index > 0) {
+                doPress({
+                  indicator: false,
+                  data: {},
+                });
+                var array = Object.assign([], actuators);
+                array.splice(press.index - 1, 1);
+                setActuators(array);
+              } else {
+                doPress({
+                  indicator: false,
+                  data: {},
+                });
+                whereAreWe(true);
+                setMeasurer({});
+              }
+            }}>
+            <Icon name="delete" size={30} />
+            <Text style={optionsMenu.text}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -284,6 +414,7 @@ const listStyles = StyleSheet.create({
   mainContainer: {
     backgroundColor: '#fff',
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
     paddingLeft: 0,
@@ -334,7 +465,7 @@ const listStyles = StyleSheet.create({
     position: 'absolute',
     right: '5%',
     bottom: '5%',
-    backgroundColor: '#83c965',
+    backgroundColor: '#ffc400',
     padding: 8,
     borderRadius: 100,
     justifyContent: 'center',
@@ -372,5 +503,27 @@ const noDeviceStyles = StyleSheet.create({
   buttonText: {
     fontStyle: 'normal',
     fontSize: 15,
+  },
+});
+
+const optionsMenu = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    width: '100%',
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    backgroundColor: 'white',
+  },
+  iconsContainer: {
+    width: '18%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    fontStyle: 'italic',
+    fontSize: 12,
+    fontWeight: '400',
   },
 });

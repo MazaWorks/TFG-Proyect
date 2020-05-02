@@ -39,7 +39,7 @@ export default function RoomsNavigation({navigation}) {
             </TouchableOpacity>
           ),
           headerStyle: {
-            backgroundColor: '#00a82a',
+            backgroundColor: '#125c28',
           },
           headerTitleStyle: {
             color: '#fff',
@@ -123,7 +123,7 @@ export default function RoomsNavigation({navigation}) {
             </TouchableOpacity>
           ),
           headerStyle: {
-            backgroundColor: '#00a82a',
+            backgroundColor: '#125c28',
           },
           headerTitleStyle: {
             color: '#fff',

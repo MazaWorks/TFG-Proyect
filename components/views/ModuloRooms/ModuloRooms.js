@@ -13,8 +13,7 @@ import {
 } from 'react-native';
 import {Icon, ListItem, Button} from 'react-native-elements';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
-import {useDimensions, useKeyboard} from '@react-native-community/hooks';
-import {useIsFocused} from '@react-navigation/native';
+import {useDimensions} from '@react-native-community/hooks';
 import {iconsRooms} from '../../common/ComponentsUtils';
 import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
 
@@ -27,27 +26,23 @@ export default function MainView({navigation, route}) {
   });
   const [rooms, getRooms] = useState([]);
   const {width, height} = useDimensions().window;
-  const keyboard = useKeyboard();
-  const isFocused = useIsFocused();
 
   useEffect(() => {
-    if (isFocused) {
-      setLoading(true);
-      if (route.params != null && route.params.addIndicator) {
-        addItem('rooms', rooms, route.params.newRooms).then(value => {
-          getRooms(value);
-          setLoading(false);
-        });
-        route.params = null;
-      } else {
-        getAllData('rooms').then(value => {
-          getRooms(value);
-          setLoading(false);
-        });
-      }
+    setLoading(true);
+    if (route.params != null && route.params.addIndicator) {
+      addItem('rooms', rooms, route.params.newRooms, null).then(value => {
+        getRooms(value);
+        setLoading(false);
+      });
+      route.params = null;
+    } else {
+      getAllData('rooms').then(value => {
+        getRooms(value);
+        setLoading(false);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.params, isFocused]);
+  }, [route.params]);
 
   useLayoutEffect(() => {
     if (!longPress.indicator) {
@@ -177,7 +172,7 @@ export default function MainView({navigation, route}) {
         style={[
           styles.listHeader,
           {
-            marginTop: height * 0.1,
+            marginTop: height * 0.05,
             marginBottom: height * 0.05,
           },
         ]}>
@@ -250,9 +245,7 @@ export default function MainView({navigation, route}) {
             style={[
               modalStyle.modelComponentsContainer,
               {
-                marginBottom: keyboard.keyboardShown
-                  ? height * 0.05
-                  : height * 0.2,
+                marginBottom: height * 0.05,
                 width: width * 0.9,
               },
             ]}>
@@ -261,6 +254,7 @@ export default function MainView({navigation, route}) {
               style={modalStyle.textInput}
               textAlign="center"
               textContentType="name"
+              maxLength={10}
               onChangeText={text => setRename({indicator: true, name: text})}
               value={rename.name}
             />
@@ -438,7 +432,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: '5%',
     bottom: '5%',
-    backgroundColor: '#83c965',
+    backgroundColor: '#125c28',
     padding: 10,
     borderRadius: 100,
     justifyContent: 'center',

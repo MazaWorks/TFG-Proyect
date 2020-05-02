@@ -18,20 +18,64 @@ export function iconsRooms(type) {
       return {icon_name: 'tree', type: 'material-community'};
   }
 }
+export function roomsTop(type) {
+  switch (type) {
+    case 1:
+      return {
+        color: '#8a623b',
+        image: require('../../assets/RoomViewTop/bedroom.png'),
+      };
+    case 2:
+      return {
+        color: '#d6d6d6',
+        image: require('../../assets/RoomViewTop/kitchen.png'),
+      };
+    case 3:
+      return {
+        color: '#2d8080',
+        image: require('../../assets/RoomViewTop/bathroom.png'),
+      };
+    case 4:
+      return {
+        color: '#125c28',
+        image: require('../../assets/RoomViewTop/livingroom.png'),
+      };
+    case 5:
+      return {
+        color: '#b3b00c',
+        image: require('../../assets/RoomViewTop/dinningroom.png'),
+      };
+    case 6:
+      return {
+        color: '#bd4f91',
+        image: require('../../assets/RoomViewTop/babyroom.png'),
+      };
+    case 7:
+      return {
+        color: '#701818',
+        image: require('../../assets/RoomViewTop/kidsroom.png'),
+      };
+    case 8:
+      return {
+        color: '#1c7812',
+        image: require('../../assets/RoomViewTop/backyard.png'),
+      };
+  }
+}
 
 export function imagesDevices(type) {
   switch (type) {
     case 0:
       return require('../../assets/Devices/clock.png');
     case 1:
-      return require('../../assets/Devices/DHT22.jpg');
+      return require('../../assets/Devices/DHT22.png');
   }
 }
 
 export function nameDefaultDevices(type) {
   switch (type) {
     case 1:
-      return 'MedidorTemperatura';
+      return 'DHT22';
   }
 }
 

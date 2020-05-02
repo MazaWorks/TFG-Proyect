@@ -10,13 +10,13 @@ const Stack = createStackNavigator();
 
 export default function DevicesNavigation({navigation}) {
   return (
-    <Stack.Navigator initialRouteName="Devices">
+    <Stack.Navigator initialRouteName="ModuloDevices">
       <Stack.Screen
-        name="Devices"
+        name="ModuloDevices"
         component={MainView}
         options={{
           headerStyle: {
-            backgroundColor: '#00a82a',
+            backgroundColor: '#1e5885',
           },
           headerTitleStyle: {
             color: '#fff',
@@ -34,12 +34,12 @@ export default function DevicesNavigation({navigation}) {
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('Devices')}>
+              onPress={() => navigation.navigate('ModuloDevices')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),
           headerStyle: {
-            backgroundColor: '#00a82a',
+            backgroundColor: '#1e5885',
           },
           headerTitleStyle: {
             color: '#fff',
@@ -57,12 +57,12 @@ export default function DevicesNavigation({navigation}) {
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('Devices')}>
+              onPress={() => navigation.navigate('ModuloDevices')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),
           headerStyle: {
-            backgroundColor: '#00a82a',
+            backgroundColor: '#1e5885',
           },
           headerTitleStyle: {
             color: '#fff',

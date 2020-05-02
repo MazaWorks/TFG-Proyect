@@ -29,7 +29,7 @@ export default function SearchingDevices({navigation}) {
           <TouchableOpacity
             style={styles.iconHeaderContainer}
             onPress={() => {
-              navigation.navigate('Devices', {
+              navigation.navigate('ModuloDevices', {
                 newDevices: devices,
                 addIndicator: true,
               });

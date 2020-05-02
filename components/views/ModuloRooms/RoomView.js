@@ -11,11 +11,12 @@ import {
 } from 'react-native';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {useDimensions} from '@react-native-community/hooks';
-import {imagesDevices} from '../../common/ComponentsUtils';
+import {imagesDevices, roomsTop} from '../../common/ComponentsUtils';
 import {getDevicesbyRoom} from '../../common/Dao';
 
 export default function RoomView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
+  const [topView] = useState(roomsTop(route.params.data.idRoom));
   const [devices, setDevices] = useState([]);
   const {width, height} = useDimensions().window;
 
@@ -30,6 +31,9 @@ export default function RoomView({navigation, route}) {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: route.params.data.name,
+      headerTitleStyle: {
+        color: 'black',
+      },
     });
   });
 
@@ -45,7 +49,7 @@ export default function RoomView({navigation, route}) {
               width: (width * 0.9) / 3,
               height: (width * 0.9) / 3,
               alignSelf: 'center',
-              backgroundColor: '#dce6e6',
+              backgroundColor: 'white',
             }}
             resizeMode="contain"
           />
@@ -70,20 +74,20 @@ export default function RoomView({navigation, route}) {
     return (
       <View style={styles.container}>
         <View
-          style={[
-            styles.listHeader,
-            {
-              width: '100%',
-              height: height * 0.3,
-            },
-          ]}>
+          style={{
+            width: '100%',
+            height: height * 0.3,
+            borderBottomWidth: 1,
+            borderColor: 'gainsboro',
+            backgroundColor: topView.color,
+          }}>
           <Image
-            source={require('../../../assets/Rooms/roomViewTop.png')}
+            source={topView.image}
             style={{
               width: '100%',
-              height: '110%',
+              height: '100%',
               alignSelf: 'center',
-              opacity: 0.2,
+              opacity: 0.3,
             }}
             resizeMode="contain"
           />
@@ -98,20 +102,20 @@ export default function RoomView({navigation, route}) {
   return (
     <View style={styles.container}>
       <View
-        style={[
-          styles.listHeader,
-          {
-            width: '100%',
-            height: height * 0.3,
-          },
-        ]}>
+        style={{
+          width: '100%',
+          height: height * 0.3,
+          borderBottomWidth: 1,
+          borderColor: 'gainsboro',
+          backgroundColor: topView.color,
+        }}>
         <Image
-          source={require('../../../assets/Rooms/roomViewTop.png')}
+          source={topView.image}
           style={{
             width: '100%',
-            height: '110%',
+            height: '100%',
             alignSelf: 'center',
-            opacity: 0.2,
+            opacity: 0.3,
           }}
           resizeMode="contain"
         />
@@ -143,9 +147,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0ffff',
   },
-  listHeader: {
-    backgroundColor: 'rgba(10,74,29,0.9)',
-  },
   flatList: {
     alignItems: 'center',
     marginBottom: '5%',
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
   textStyle: {
     padding: '2%',
     marginBottom: '1%',
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: 'bold',
     alignSelf: 'center',
   },

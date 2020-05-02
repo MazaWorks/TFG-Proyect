@@ -11,7 +11,7 @@ import RulesNavigation from './views/ModuloRules/RulesNavigation';
 import {View, Text, Image, StyleSheet} from 'react-native';
 
 const Drawer = createDrawerNavigator();
-const INITIAL_ROUTE_NAME = 'Rules';
+const INITIAL_ROUTE_NAME = 'Rooms';
 
 export default function MainNavigation() {
   return (
@@ -63,8 +63,8 @@ function CustomDrawerContent(props) {
           source={require('../assets/no_user.png')}
           style={styles.profileImg}
         />
-        <Text style={styles.nameApp}>BeYourHome</Text>
-        <Text style={styles.username}>MazaJunior</Text>
+        <Text style={styles.nameApp}>StayHome</Text>
+        <Text style={styles.username}>Default User</Text>
       </View>
       <DrawerItemList {...props} />
     </DrawerContentScrollView>

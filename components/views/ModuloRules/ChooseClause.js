@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   Platform,
 } from 'react-native';
-import {Icon} from 'react-native-elements';
 import {useDimensions} from '@react-native-community/hooks';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {imagesDevices} from '../../common/ComponentsUtils';
@@ -40,8 +39,8 @@ export default function MainView({navigation, route}) {
         ]}
         onPress={() =>
           navigation.navigate('ClauseByDevice', {
+            ...route.params,
             device: data,
-            if: route.params.if,
           })
         }>
         <Image
@@ -112,10 +111,10 @@ export default function MainView({navigation, route}) {
             ]}
             onPress={() =>
               navigation.navigate('ClauseByDevice', {
+                ...route.params,
                 device: {
                   type: 0,
                 },
-                if: route.params.if,
               })
             }>
             <Image

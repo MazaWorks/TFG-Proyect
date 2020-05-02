@@ -36,13 +36,15 @@ export default function MainView({navigation, route}) {
     if (isFocused) {
       setLoading(true);
       if (route.params != null && route.params.addIndicator) {
-        addItem('rules', rules, route.params.rule).then(value => {
-          getDevicebyRule(value, false).then(value2 => {
-            setDevices(value2);
-            getRules(value);
-            setLoading(false);
-          });
-        });
+        addItem('rules', rules, route.params.rule, route.params.index).then(
+          value => {
+            getDevicebyRule(value, false).then(value2 => {
+              setDevices(value2);
+              getRules(value);
+              setLoading(false);
+            });
+          },
+        );
         route.params = null;
       } else {
         getAllData('rules').then(value => {
@@ -99,7 +101,7 @@ export default function MainView({navigation, route}) {
         style={[
           listStyles.mainContainer,
           {
-            width: width * 0.8,
+            width: width * 0.9,
             backgroundColor:
               longPress.indicator && longPress.index === index
                 ? 'rgba(0,0,0,0.2)'
@@ -109,7 +111,10 @@ export default function MainView({navigation, route}) {
         onPress={() =>
           longPress.indicator
             ? null
-            : navigation.navigate('RuleView', {data: data})
+            : navigation.navigate('AddRule', {
+                rule: data,
+                index: index,
+              })
         }
         onLongPress={() => {
           doLongPress({indicator: true, data: data, index: index});
@@ -127,10 +132,10 @@ export default function MainView({navigation, route}) {
               ]}
               resizeMode="contain"
             />
-            <View style={{width: (width * 0.8) / 5}}>
+            <View style={{width: (width * 0.8) / 4}}>
               <Text style={listStyles.deviceName}>{deviceIf.name}</Text>
               <Text style={listStyles.deviceRoom}>
-                {deviceIf.room != null ? 'On ' + deviceIf.room : 'Not Assigned'}
+                {deviceIf.room != null ? deviceIf.room : 'Not Assigned'}
               </Text>
             </View>
           </View>
@@ -153,12 +158,10 @@ export default function MainView({navigation, route}) {
                 ]}
                 resizeMode="contain"
               />
-              <View style={{width: (width * 0.8) / 5}}>
+              <View style={{width: (width * 0.8) / 4}}>
                 <Text style={listStyles.deviceName}>{deviceThen.name}</Text>
                 <Text style={listStyles.deviceRoom}>
-                  {deviceThen.room != null
-                    ? 'On ' + deviceThen.room
-                    : 'Not Assigned'}
+                  {deviceThen.room != null ? deviceThen.room : 'Not Assigned'}
                 </Text>
               </View>
             </View>
@@ -243,11 +246,10 @@ export default function MainView({navigation, route}) {
             marginBottom: height * 0.05,
           },
         ]}>
-        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Edit a Rule</Text>
+        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Rule</Text>
       </View>
       <OptimizedFlatList
         style={{
-          width: width * 0.8,
           marginBottom: height * 0.04,
         }}
         data={rules}
@@ -260,12 +262,23 @@ export default function MainView({navigation, route}) {
         <TouchableOpacity
           style={listStyles.addRoom}
           onPress={() => navigation.navigate('AddRule')}>
-          <Icon name="add" type="material" color="#ffc400" size={40} />
+          <Icon name="add" type="material" color="#125c28" size={40} />
         </TouchableOpacity>
       )}
       {longPress.indicator && (
         <View style={[optionsMenu.container, {height: height * 0.09}]}>
-          <TouchableOpacity style={optionsMenu.iconsContainer}>
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
+              doLongPress({
+                indicator: false,
+                data: {},
+              });
+              navigation.navigate('AddRule', {
+                rule: longPress.data,
+                index: longPress.index,
+              });
+            }}>
             <Icon name="edit" size={30} />
             <Text style={optionsMenu.text}>Edit</Text>
           </TouchableOpacity>
@@ -335,7 +348,7 @@ const listStyles = StyleSheet.create({
     position: 'absolute',
     right: '5%',
     bottom: '5%',
-    backgroundColor: '#83c965',
+    backgroundColor: '#ffc400',
     padding: 10,
     borderRadius: 100,
     justifyContent: 'center',

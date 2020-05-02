@@ -146,13 +146,19 @@ export async function addDeviceToRoom(room, devices, items) {
   }
 }
 
-export async function addItem(name, array, item) {
+export async function addItem(name, array, item, index) {
+  console.log(index);
   var newValue = Object.assign([], array);
   var addDevices = false;
   var diffName = 0;
   if (name === 'rules') {
-    addDevices = true;
-    newValue.push(item);
+    if (index != null) {
+      addDevices = true;
+      newValue[index] = item;
+    } else {
+      addDevices = true;
+      newValue.push(item);
+    }
   } else if (name === 'devices') {
     for (var elements of item) {
       var add = true;
@@ -202,7 +208,6 @@ export async function addItem(name, array, item) {
 export async function deleteItem(name, array, item) {
   var addPlus = false;
   var index = array.indexOf(item);
-  console.log(index);
   if (index >= 0) {
     array.splice(index, 1);
     if (name === 'rules') {
