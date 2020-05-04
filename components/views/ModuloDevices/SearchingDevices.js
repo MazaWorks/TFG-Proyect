@@ -104,7 +104,7 @@ export default function SearchingDevices({navigation}) {
       clearInterval(interval);
       setLoading(false);
       setDevices(devicesFound);
-    }, 2000);
+    }, 5000);
 
     return (
       <View style={styles.container}>

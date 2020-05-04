@@ -147,7 +147,6 @@ export async function addDeviceToRoom(room, devices, items) {
 }
 
 export async function addItem(name, array, item, index) {
-  console.log(index);
   var newValue = Object.assign([], array);
   var addDevices = false;
   var diffName = 0;

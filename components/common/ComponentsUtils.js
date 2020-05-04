@@ -69,6 +69,8 @@ export function imagesDevices(type) {
       return require('../../assets/Devices/clock.png');
     case 1:
       return require('../../assets/Devices/DHT22.png');
+    case 2:
+      return require('../../assets/Devices/Lampara.png');
   }
 }
 
@@ -76,6 +78,8 @@ export function nameDefaultDevices(type) {
   switch (type) {
     case 1:
       return 'DHT22';
+    case 2:
+      return 'ReleModule';
   }
 }
 
