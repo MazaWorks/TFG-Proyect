@@ -21,6 +21,10 @@ DerivedData
 *.ipa
 *.xcuserstate
 
+# VSCODE
+#
+.vscode
+
 # Android/IntelliJ
 #
 build/
