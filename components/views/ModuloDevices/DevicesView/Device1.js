@@ -5,18 +5,18 @@ import {
   Text,
   ActivityIndicator,
   Platform,
+  TouchableOpacity,
+  Switch,
 } from 'react-native';
 import {useDimensions} from '@react-native-community/hooks';
 
 export default function DeviceView({navigation, device}) {
   const [isLoading, setLoading] = useState(true);
+  const hasDHT = device.devices.indexOf(1) !== -1;
+  const [readings, getReadings] = useState([]);
   const [errorRequest, setErrorRequest] = useState({
     indicator: false,
     error: null,
-  });
-  const [readings, getReadings] = useState({
-    temperature: 'searching...',
-    humidity: 'searching...',
   });
   const {width, height} = useDimensions().window;
 
@@ -30,47 +30,57 @@ export default function DeviceView({navigation, device}) {
     fetch('http://' + device.ip + '/readings')
       .then(response => response.json())
       .then(json => {
-        getReadings({
-          temperature: json.Temperature + 'ºC',
-          humidity: json.Humidity + '%',
-        });
+        getReadings(json.Values);
       })
       .catch(error => {
         setErrorRequest({
           indicator: true,
           error: error.message,
         });
-        getReadings({
-          temperature: 'Not Available',
-          humidity: 'Not Available',
-        });
       })
       .finally(() => setLoading(false));
   }, [device.ip]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetch('http://' + device.ip + '/readings')
-        .then(response => response.json())
-        .then(json => {
-          getReadings({
-            temperature: json.Temperature + 'ºC',
-            humidity: json.Humidity + '%',
+    if (hasDHT) {
+      const interval = setInterval(() => {
+        fetch('http://' + device.ip + '/readings')
+          .then(response => response.json())
+          .then(json => {
+            getReadings(json.Values);
+          })
+          .catch(error => {
+            setErrorRequest({
+              indicator: true,
+              error: error.message,
+            });
+            getReadings([]);
           });
-        })
-        .catch(error => {
-          setErrorRequest({
-            indicator: true,
-            error: error.message,
-          });
-          getReadings({
-            temperature: 'Not Available',
-            humidity: 'Not Available',
-          });
+      }, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [device.ip, hasDHT]);
+
+  function sendValues(value, key) {
+    var url =
+      value === 1
+        ? 'http://' + device.ip + '/turnOn?pin=' + key
+        : 'http://' + device.ip + '/turnOff?pin=' + key;
+    fetch(url, {
+      method: 'POST',
+    })
+      .then(response => response.json())
+      .then(json => {
+        getReadings(json.Values);
+      })
+      .catch(error => {
+        setErrorRequest({
+          indicator: true,
+          error: error.message,
         });
-    }, 60000);
-    return () => clearInterval(interval);
-  }, [device.ip]);
+        getReadings([]);
+      });
+  }
 
   if (isLoading) {
     return (
@@ -100,28 +110,62 @@ export default function DeviceView({navigation, device}) {
 
   return (
     <View style={styles.mainContainer}>
-      <View
-        style={[
-          styles.dataContainer,
-          {
-            height: width * 0.4,
-            marginBottom: height * 0.1,
-          },
-        ]}>
-        <Text style={styles.name}>Temperature</Text>
-        <Text style={styles.name}>{readings.temperature}</Text>
-      </View>
+      {readings.map((act, key) => {
+        if (device.devices[key] === 2) {
+          var enable = act === 0 ? false : true;
+          return (
+            <TouchableOpacity
+              key={key}
+              style={styles.dataContainer}
+              onPress={() => {
+                var newValue = Object.assign([], readings);
+                newValue[key] = !enable ? 1 : 0;
+                getReadings(newValue);
+                sendValues(newValue[key], key);
+              }}>
+              <Text style={styles.name}>GPIO {key}</Text>
+              <Switch
+                disabled={true}
+                style={{transform: [{scaleX: 1.5}, {scaleY: 1.5}]}}
+                trackColor={{false: '#767577', true: '#125c28'}}
+                thumbColor={enable ? '#f5dd4b' : '#f4f3f4'}
+                value={enable}
+              />
+            </TouchableOpacity>
+          );
+        } else {
+          return (
+            <View key={key} style={styles.tempHumContainer}>
+              <Text style={styles.name}>GPIO {key}</Text>
+              <View style={styles.tempHumContainer2}>
+                <View
+                  style={[
+                    styles.tempHumCircle,
+                    {
+                      width: width * 0.3,
+                      height: width * 0.3,
+                    },
+                  ]}>
+                  <Text style={styles.name}>Temperature</Text>
+                  <Text style={styles.name}>{act.Temperature}ºC</Text>
+                </View>
 
-      <View
-        style={[
-          styles.dataContainer,
-          {
-            height: width * 0.4,
-          },
-        ]}>
-        <Text style={styles.name}>Humidity</Text>
-        <Text style={styles.name}>{readings.humidity}</Text>
-      </View>
+                <View
+                  style={[
+                    styles.tempHumCircle,
+                    {
+                      width: width * 0.3,
+                      height: width * 0.3,
+                    },
+                  ]}>
+                  <Text style={styles.name}>Humidity</Text>
+                  <Text style={styles.name}>{act.Humidity}%</Text>
+                </View>
+              </View>
+            </View>
+          );
+        }
+      })}
     </View>
   );
 }
@@ -136,18 +180,44 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(46, 126, 255, 1)',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
   },
   dataContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    width: '80%',
+    padding: 20,
+    borderRadius: 200,
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  tempHumContainer: {
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    width: '80%',
+    padding: 5,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: 'white',
+  },
+  tempHumContainer2: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    width: '100%',
+    padding: 5,
+  },
+  tempHumCircle: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: '40%',
+    padding: 5,
     borderRadius: 200,
     borderWidth: 1,
     borderColor: 'white',
   },
   name: {
-    fontSize: 20,
+    fontSize: 14,
     fontWeight: 'bold',
     color: 'white',
   },

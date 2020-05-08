@@ -8,28 +8,131 @@
 #include <ArduinoJson.h>
 #include <WiFiUdp.h>
 
-#define DHTPIN 2 // Digital pin connected to the DHT sensor
-#define DHTTYPE DHT22
 #define APSSID "ESP8266-01"
 #define APPASS "root"
 
 AsyncWebServer server(80);
 DNSServer dns;
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht(2, DHT22);
 WiFiUDP Udp;
-const int id = 1;
-const int idDevice = 1;
 float t = 0.0;
 float h = 0.0;
 unsigned long previousMillis = 0;
 const long interval = 60000;
+const char responseUDP[50] = "{\"id\": 1,\"type\": 1,\"devices\": [2,2,1,2]}";
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
 
 const char readResponse[] PROGMEM = R"rawliteral(
-  { "Temperature": %TEMPERATURE%, 
-  "Humidity": %HUMIDITY% }
-)rawliteral";
+  {"Values": [%V0% %V1%, {"Temperature": %TEMPERATURE%, 
+  "Humidity": %HUMIDITY%} %V3%]} )rawliteral";
+  
+// Replaces placeholder with values
+String processor(const String& var) {
+  if(var == "V0"){
+    return String(digitalRead(0), DEC);
+  }
+  else if(var == "V1"){
+    return String("," + String(digitalRead(1), DEC));
+  }
+  else if(var == "V2"){
+    return String("," + String(digitalRead(2), DEC));
+  }
+  else if(var == "V3"){
+    return String("," + String(digitalRead(3), DEC));
+  }
+  else if (var == "TEMPERATURE")
+  {
+    return String(t);
+  }
+  else if (var == "HUMIDITY")
+  {
+    return String(h);
+  }
+  return String();
+}
 
+void setup() {
+  // Pins set as output
+  pinMode(0, OUTPUT);
+  pinMode(1, OUTPUT);
+  pinMode(3, OUTPUT);
+  
+  dht.begin();
+
+  AsyncWiFiManager wifiManager(&server, &dns);
+  if (!wifiManager.autoConnect(APSSID, APPASS)){
+    ESP.reset();
+    delay(1000);
+  }
+  
+  server.on("/readings", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "application/json", readResponse, processor);
+  });
+  server.on("/turnOn", HTTP_POST, [](AsyncWebServerRequest *request){
+    if(request->hasParam("pin")) {
+      AsyncWebParameter* p = request->getParam("pin");
+      int pin = p->value().toInt();
+      if((pin == 0 && p->value().equals(String(0))) || (pin > 0 && pin < 4)){
+        digitalWrite(p->value().toInt(), HIGH);
+        request->send_P(200, "application/json", readResponse, processor);
+      } else {
+        request->send(400);
+      }
+    } else {
+      request->send(400);
+    }
+  });
+  server.on("/turnOff", HTTP_POST, [](AsyncWebServerRequest *request){
+    if(request->hasParam("pin")) {
+      AsyncWebParameter* p = request->getParam("pin");
+      int pin = p->value().toInt();
+      if((pin == 0 && p->value().equals(String(0))) || (pin > 0 && pin < 4)) {
+        digitalWrite(p->value().toInt(), LOW);
+        request->send_P(200, "application/json", readResponse, processor);
+      } else {
+        request->send(400);
+      }
+    } else {
+      request->send(400);
+    }
+  });
+  server.onNotFound([](AsyncWebServerRequest *request) {
+    request->send(404);
+  });
+
+  Udp.begin(8080);
+  server.begin();
+}
+
+void loop()
+{
+  int packetSize = Udp.parsePacket();
+  if (packetSize) {
+    int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+    packetBuffer[n] = 0;
+    String requestMessage = packetBuffer;
+    requestMessage.trim();
+    if (requestMessage.equals("?")) {
+      Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
+      Udp.write(responseUDP);
+      Udp.endPacket();
+    }
+  }
+
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval){
+    previousMillis = currentMillis;
+    float newT = dht.readTemperature();
+    float newH = dht.readHumidity();
+    if (!(isnan(newT) || isnan(newH)))
+    {
+      t = newT;
+      h = newH;
+    }
+  }
+}
+
+/*
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 <head>
@@ -82,102 +185,4 @@ setInterval(function ( ) {
 }, 60000 ) ;
 </script>
 </html>)rawliteral";
-
-// Replaces placeholder with DHT values
-String processor(const String &var)
-{
-  if (var == "TEMPERATURE")
-  {
-    return String(t);
-  }
-  else if (var == "HUMIDITY")
-  {
-    return String(h);
-  }
-  return String();
-}
-
-void setup()
-{
-  Serial.begin(115200);
-  dht.begin();
-
-  Serial.println();
-  Serial.println("Configuring access point...");
-  AsyncWiFiManager wifiManager(&server, &dns);
-  if (!wifiManager.autoConnect(APSSID, APPASS))
-  {
-    Serial.println("failed to connect and hit timeout");
-    //reset and try again, or maybe put it to deep sleep
-    ESP.reset();
-    delay(1000);
-  }
-
-  // Route for root / web page
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send_P(200, "text/html", index_html, processor);
-  });
-  server.on("/readings", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send_P(200, "application/json", readResponse, processor);
-  });
-  server.onNotFound([](AsyncWebServerRequest *request) {
-    request->send(404);
-  });
-
-  Udp.begin(8080);
-  server.begin();
-  Serial.print("Esp8266 on: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("UDP Port: ");
-  Serial.println(Udp.localPort());
-}
-
-void loop()
-{
-  int packetSize = Udp.parsePacket();
-  if (packetSize)
-  {
-    Serial.printf("Received packet of size %d from %s:%d\n    (to %s:%d, free heap = %d B)\n",
-                  packetSize,
-                  Udp.remoteIP().toString().c_str(), Udp.remotePort(),
-                  Udp.destinationIP().toString().c_str(), Udp.localPort(),
-                  ESP.getFreeHeap());
-    int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
-    packetBuffer[n] = 0;
-    Serial.print("Content: ");
-    Serial.println(packetBuffer);
-    String requestMessage = packetBuffer;
-    requestMessage.trim();
-    if (requestMessage.equals("?"))
-    {
-      requestMessage = "{\"id\": " + String(id) + ", \"idDevice\": " + String(idDevice) + "}";
-      int str_len = requestMessage.length() + 1;
-      char response[str_len];
-      requestMessage.toCharArray(response, str_len);
-      // send a reply, to the IP address and port that sent us the packet we received
-      Udp.beginPacket(Udp.remoteIP(), Udp.remotePort());
-      Udp.write(response);
-      Udp.endPacket();
-    }
-  }
-
-  unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= interval)
-  {
-    previousMillis = currentMillis;
-    float newT = dht.readTemperature();
-    float newH = dht.readHumidity();
-    if (isnan(newT) || isnan(newH))
-    {
-      Serial.println("Failed to read from DHT sensor!");
-    }
-    else
-    {
-      t = newT;
-      h = newH;
-      Serial.print(t);
-      Serial.print(" - ");
-      Serial.println(h);
-    }
-  }
-}
+*/

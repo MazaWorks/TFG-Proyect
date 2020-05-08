@@ -18,6 +18,7 @@ export function iconsRooms(type) {
       return {icon_name: 'tree', type: 'material-community'};
   }
 }
+
 export function roomsTop(type) {
   switch (type) {
     case 1:
@@ -77,9 +78,7 @@ export function imagesDevices(type) {
 export function nameDefaultDevices(type) {
   switch (type) {
     case 1:
-      return 'DHT22';
-    case 2:
-      return 'ReleModule';
+      return 'ESP8266';
   }
 }
 

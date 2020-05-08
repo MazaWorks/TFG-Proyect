@@ -25,6 +25,10 @@ DerivedData
 #
 .vscode
 
+# Arduino
+#
+Arduino/libraries
+
 # Android/IntelliJ
 #
 build/

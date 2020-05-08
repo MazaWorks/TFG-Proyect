@@ -68,7 +68,7 @@ export default function SearchingDevices({navigation}) {
   };
 
   if (isLoading) {
-    var devicesFound = [];
+    var devicesFound = new Set();
     var socket = dgram.createSocket('udp4');
     socket.bind();
 
@@ -79,31 +79,27 @@ export default function SearchingDevices({navigation}) {
     });
 
     socket.on('message', function(data, rinfo) {
-      var add = true;
-      for (let dev of devicesFound) {
-        if (dev.ip === rinfo.address) {
-          add = false;
-          break;
-        }
-      }
-      if (add) {
-        var json = JSON.parse(
-          String.fromCharCode.apply(null, new Uint8Array(data)),
-        );
-        devicesFound.push({
-          id: json.id,
+      var json = JSON.parse(
+        String.fromCharCode.apply(null, new Uint8Array(data)),
+      );
+      devicesFound.add(
+        JSON.stringify({
+          ...json,
           ip: rinfo.address,
-          type: json.idDevice,
-          name: nameDefaultDevices(json.idDevice),
-        });
-      }
+          name: nameDefaultDevices(json.type),
+        }),
+      );
     });
 
     const interval = setInterval(() => {
       socket.close();
       clearInterval(interval);
+      var devices = [];
+      for (let device of devicesFound) {
+        devices.push(JSON.parse(device));
+      }
       setLoading(false);
-      setDevices(devicesFound);
+      setDevices(devices);
     }, 5000);
 
     return (
