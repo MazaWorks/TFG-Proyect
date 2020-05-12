@@ -24,7 +24,7 @@ import {
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, setDevices] = useState(new Map());
-  const [rules, getRules] = useState([]);
+  const [rules, setRules] = useState([]);
   const [longPress, doLongPress] = useState({
     indicator: false,
     data: {},
@@ -40,7 +40,7 @@ export default function MainView({navigation, route}) {
           value => {
             getDevicebyRule(value, false).then(value2 => {
               setDevices(value2);
-              getRules(value);
+              setRules(value);
               setLoading(false);
             });
           },
@@ -50,7 +50,7 @@ export default function MainView({navigation, route}) {
         getAllData('rules').then(value => {
           getDevicebyRule(value, false).then(value2 => {
             setDevices(value2);
-            getRules(value);
+            setRules(value);
             setLoading(false);
           });
         });
@@ -90,10 +90,10 @@ export default function MainView({navigation, route}) {
   }, [devices, longPress, navigation]);
 
   const Item = ({data, index}) => {
-    var deviceIf = devices.get(data.if.deviceId);
+    var deviceIf = devices.get(data.if.device.deviceId);
     var srcImageif = imagesDevices(deviceIf.type);
-    if (data.then[0].deviceId != null) {
-      var deviceThen = devices.get(data.then[0].deviceId);
+    if (data.then[0].device.deviceId != null) {
+      var deviceThen = devices.get(data.then[0].device.deviceId);
       var srcImagethen = imagesDevices(deviceThen.type);
     }
     return (
@@ -132,8 +132,11 @@ export default function MainView({navigation, route}) {
               ]}
               resizeMode="contain"
             />
-            <View style={{width: (width * 0.8) / 4}}>
+            <View style={{width: (width * 0.8) / 5, marginLeft: width * 0.02}}>
               <Text style={listStyles.deviceName}>{deviceIf.name}</Text>
+              <Text style={listStyles.deviceRoom}>
+                GPIO {data.if.device.gpio}
+              </Text>
               <Text style={listStyles.deviceRoom}>
                 {deviceIf.room != null ? deviceIf.room : 'Not Assigned'}
               </Text>
@@ -145,7 +148,7 @@ export default function MainView({navigation, route}) {
         </View>
         <Text style={listStyles.arrow}>></Text>
         <View>
-          {data.then[0].deviceId != null ? (
+          {data.then[0].device.deviceId != null ? (
             <View style={listStyles.deviceContainer}>
               <Image
                 source={srcImagethen}
@@ -158,8 +161,12 @@ export default function MainView({navigation, route}) {
                 ]}
                 resizeMode="contain"
               />
-              <View style={{width: (width * 0.8) / 4}}>
+              <View
+                style={{width: (width * 0.8) / 5, marginLeft: width * 0.02}}>
                 <Text style={listStyles.deviceName}>{deviceThen.name}</Text>
+                <Text style={listStyles.deviceRoom}>
+                  GPIO {data.then[0].device.gpio}
+                </Text>
                 <Text style={listStyles.deviceRoom}>
                   {deviceThen.room != null ? deviceThen.room : 'Not Assigned'}
                 </Text>
@@ -288,7 +295,7 @@ export default function MainView({navigation, route}) {
               setLoading(true);
               var array = Object.assign([], rules);
               deleteItem('rules', array, longPress.data).then(value => {
-                getRules(value);
+                setRules(value);
                 doLongPress({
                   indicator: false,
                   data: {},

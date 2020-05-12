@@ -46,8 +46,8 @@ export default function RulesNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="ClauseByDevice"
-        component={ClauseByDevice}
+        name="ChooseClause"
+        component={ChooseClause}
         options={{
           headerLeft: () => (
             <TouchableOpacity
@@ -69,13 +69,13 @@ export default function RulesNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="ChooseClause"
-        component={ChooseClause}
+        name="ClauseByDevice"
+        component={ClauseByDevice}
         options={{
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('ClauseByDevice')}>
+              onPress={() => navigation.navigate('ChooseClause')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),

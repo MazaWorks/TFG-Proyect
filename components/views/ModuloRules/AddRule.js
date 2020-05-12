@@ -55,18 +55,24 @@ export default function MainView({navigation, route}) {
           id: route.params.condition.id,
           description: route.params.condition.description,
           value: route.params.condition.value,
-          deviceId: route.params.deviceId,
+          device: {
+            deviceId: route.params.device.deviceId,
+            gpio: route.params.device.gpio,
+          },
         });
         whereAreWe(false);
       } else {
         var newValue = Object.assign([], actuators);
         var newActuator;
-        if (route.params.deviceId !== 0) {
+        if (route.params.device.deviceId !== -1) {
           newActuator = {
             id: route.params.condition.id,
             description: route.params.condition.description,
             value: route.params.condition.value,
-            deviceId: route.params.deviceId,
+            device: {
+              deviceId: route.params.device.deviceId,
+              gpio: route.params.device.gpio,
+            },
           };
         } else {
           newActuator = {
@@ -95,7 +101,7 @@ export default function MainView({navigation, route}) {
         var toAdd = false;
         if (actuators.length !== 0) {
           for (let actuator of actuators) {
-            if (actuator.deviceId != null) {
+            if (actuator.device.deviceId != null) {
               toAdd = true;
             }
           }
@@ -169,7 +175,7 @@ export default function MainView({navigation, route}) {
 
   const Measurer = ({data}) => {
     if (data.id != null) {
-      var device = devices.get(data.deviceId);
+      var device = devices.get(data.device.deviceId);
       var srcImage = imagesDevices(device.type);
       return (
         <TouchableOpacity
@@ -198,8 +204,13 @@ export default function MainView({navigation, route}) {
               ]}
               resizeMode="contain"
             />
-            <View style={[listStyles.devicesInfo, {width: width * 0.25}]}>
+            <View
+              style={[
+                listStyles.devicesInfo,
+                {width: width * 0.25, marginLeft: width * 0.03},
+              ]}>
               <Text style={listStyles.deviceName}>{device.name}</Text>
+              <Text style={listStyles.deviceRoom}>GPIO {data.device.gpio}</Text>
               <Text style={listStyles.deviceRoom}>
                 {device.room != null ? device.room : 'Not Assigned'}
               </Text>
@@ -230,8 +241,8 @@ export default function MainView({navigation, route}) {
 
   const Actuators = ({data}) => {
     return data.map((act, key) => {
-      if (act.deviceId != null) {
-        var device = devices.get(act.deviceId);
+      if (act.device.deviceId != null) {
+        var device = devices.get(act.device.deviceId);
         var srcImage = imagesDevices(device.type);
       }
       return (
@@ -244,19 +255,14 @@ export default function MainView({navigation, route}) {
                 press.indicator && press.index === key + 1
                   ? 'rgba(0,0,0,0.2)'
                   : 'white',
-              flexDirection: act.deviceId != null ? 'row' : 'column',
               width: width * 0.9,
             },
           ]}
           onPress={() => {
             doPress({indicator: true, data: act, index: key + 1});
           }}>
-          {act.deviceId != null ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
+          {act.device.deviceId != null ? (
+            <View style={listStyles.deviceContainer}>
               <View style={listStyles.deviceContainer}>
                 <Image
                   source={srcImage}
@@ -269,8 +275,15 @@ export default function MainView({navigation, route}) {
                   ]}
                   resizeMode="contain"
                 />
-                <View style={[listStyles.devicesInfo, {width: width * 0.25}]}>
+                <View
+                  style={[
+                    listStyles.devicesInfo,
+                    {width: width * 0.25, marginLeft: width * 0.03},
+                  ]}>
                   <Text style={listStyles.deviceName}>{device.name}</Text>
+                  <Text style={listStyles.deviceRoom}>
+                    GPIO {act.device.gpio}
+                  </Text>
                   <Text style={listStyles.deviceRoom}>
                     {device.room != null ? device.room : 'Not Assigned'}
                   </Text>
@@ -369,7 +382,7 @@ export default function MainView({navigation, route}) {
                 data: {},
               });
               navigation.navigate('ChooseClause', {
-                if: onIf,
+                if: press.index === 0 ? true : false,
                 replace: press.index - 1,
               });
             }}>

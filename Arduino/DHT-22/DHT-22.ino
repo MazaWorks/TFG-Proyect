@@ -1,10 +1,12 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
 #include <ESPAsyncWiFiManager.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
+#include <AsyncJson.h>
 #include <ArduinoJson.h>
 #include <WiFiUdp.h>
 
@@ -19,12 +21,20 @@ float t = 0.0;
 float h = 0.0;
 unsigned long previousMillis = 0;
 const long interval = 60000;
+const char rules[2][10] = {"turnOff", "turnOn"};
 const char responseUDP[50] = "{\"id\": 1,\"type\": 1,\"devices\": [2,2,1,2]}";
+StaticJsonDocument<JSON_OBJECT_SIZE(2) + 20 * JSON_OBJECT_SIZE(3)> doc;
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
+int mesurerId[10] = {0,0,0,0,0,0,0,0,0,0};
+int mesurerValues[10] = {0,0,0,0,0,0,0,0,0,0};
+int thenSize[10] = {0,0,0,0,0,0,0,0,0,0};
+char ipsToSend[10][10][50];
+int rule = 0;
+String body;
 
+/* On DHT22, replace a %V#% by : {"Temperature": %TEMPERATURE%, "Humidity": %HUMIDITY%}*/
 const char readResponse[] PROGMEM = R"rawliteral(
-  {"Values": [%V0% %V1%, {"Temperature": %TEMPERATURE%, 
-  "Humidity": %HUMIDITY%} %V3%]} )rawliteral";
+{"Values": [%V0%, %V1%, {"Temperature": %TEMPERATURE%, "Humidity": %HUMIDITY%}, %V3%]} )rawliteral";
   
 // Replaces placeholder with values
 String processor(const String& var) {
@@ -32,32 +42,64 @@ String processor(const String& var) {
     return String(digitalRead(0), DEC);
   }
   else if(var == "V1"){
-    return String("," + String(digitalRead(1), DEC));
+    return String(digitalRead(1), DEC);
   }
   else if(var == "V2"){
-    return String("," + String(digitalRead(2), DEC));
+    return String(digitalRead(2), DEC);
   }
   else if(var == "V3"){
-    return String("," + String(digitalRead(3), DEC));
+    return String(digitalRead(3), DEC);
   }
-  else if (var == "TEMPERATURE")
-  {
+  else if (var == "TEMPERATURE"){
     return String(t);
   }
-  else if (var == "HUMIDITY")
-  {
+  else if (var == "HUMIDITY"){
     return String(h);
   }
-  return String();
+  else{
+    return String("0");
+  }
+}
+
+void Automatize(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total){
+  for(size_t i=0; i<len; i++){
+    body += (char)data[i];
+  }
+  if(index + len == total){
+    DeserializationError err = deserializeJson(doc, body);
+    body = "";
+    if (err) {
+      request->send(400);
+    } else {
+      JsonObject mesurer = doc["if"].as<JsonObject>();
+      for (byte i = 0; i < 10; i++) {
+        if(mesurerId[i] == 0 && mesurerValues[i] == 0){
+          JsonObject act;
+          JsonArray then = doc["then"].as<JsonArray>();
+          mesurerId[i] = mesurer["id"].as<int>();
+          mesurerValues[i] = mesurer["value"].as<int>();
+          thenSize[i] = then.size();
+          for (byte i2 = 0; i2 < then.size(); i2++) {
+            act = then[i2].as<JsonObject>();
+            String("http://" + act["ip"].as<String>() + "/" + rules[act["id"].as<int>()] + "?pin=" + act["gpio"].as<String>()).toCharArray(ipsToSend[i][i2], 50);
+          }
+          break;
+        }
+      }
+      request->send(200);
+    }
+  }
 }
 
 void setup() {
+  //Serial.begin(9600);
   // Pins set as output
   pinMode(0, OUTPUT);
   pinMode(1, OUTPUT);
+  //pinMode(2, OUTPUT);
   pinMode(3, OUTPUT);
   
-  dht.begin();
+  //dht.begin();
 
   AsyncWiFiManager wifiManager(&server, &dns);
   if (!wifiManager.autoConnect(APSSID, APPASS)){
@@ -67,7 +109,8 @@ void setup() {
   
   server.on("/readings", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send_P(200, "application/json", readResponse, processor);
-  });
+  });  
+  server.on("/automatize", HTTP_POST, [](AsyncWebServerRequest * request){}, NULL, Automatize);
   server.on("/turnOn", HTTP_POST, [](AsyncWebServerRequest *request){
     if(request->hasParam("pin")) {
       AsyncWebParameter* p = request->getParam("pin");
@@ -105,7 +148,7 @@ void setup() {
 }
 
 void loop()
-{
+{  
   int packetSize = Udp.parsePacket();
   if (packetSize) {
     int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
@@ -118,12 +161,60 @@ void loop()
       Udp.endPacket();
     }
   }
+  
+  for (byte i = 0; i < 10; i++) {
+    if(mesurerId[i] != 0) {
+      switch (mesurerId[i]) {
+        case 1:
+          if(t > mesurerValues[i]){
+            rule = i + 1;
+          }
+          break;
+        case 2:
+          if(t < mesurerValues[i]){
+            rule = i + 1;
+          }
+          break;
+        case 3:
+          if(h > mesurerValues[i]){
+            rule = i + 1;
+          }
+          break;
+        case 4:
+          if(h < mesurerValues[i]){
+            rule = i + 1;
+          }
+          break;
+      }
+    }
+  }
+  
+  if (rule != 0) {
+    //Serial.println(rule);
+    for (byte i = 0; i < thenSize[rule - 1]; i++) {
+        WiFiClient client;
+        HTTPClient http;
+        delay(5000);
+        http.begin(client, ipsToSend[rule - 1][i]);
+        int httpCode = http.POST("");
+        // httpCode will be negative on error
+        if (httpCode == 200) {
+          //Serial.println("DONE WELL");
+        } else {
+          //Serial.printf("POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
+        }
+        http.end();
+    }
+    mesurerId[rule - 1] = 0;
+    rule = 0;
+  }
 
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval){
     previousMillis = currentMillis;
     float newT = dht.readTemperature();
     float newH = dht.readHumidity();
+    //Serial.println(isnan(newT));
     if (!(isnan(newT) || isnan(newH)))
     {
       t = newT;
@@ -131,58 +222,3 @@ void loop()
     }
   }
 }
-
-/*
-const char index_html[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML><html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-  <style>
-    html {
-     font-family: Arial;
-     display: inline-block;
-     margin: 0px auto;
-     text-align: center;
-    }
-    h2 { font-size: 3.0rem; }
-    p { font-size: 3.0rem; }
-    .units { font-size: 1.2rem; }
-    .dht-labels{
-      font-size: 1.5rem;
-      vertical-align:middle;
-      padding-bottom: 15px;
-    }
-  </style>
-</head>
-<body>
-  <h2>ESP8266 DHT Server</h2>
-  <p>
-    <i class="fas fa-thermometer-half" style="color:#059e8a;"></i> 
-    <span class="dht-labels">Temperature</span> 
-    <span id="temperature">%TEMPERATURE%</span>
-    <sup class="units">&deg;C</sup>
-  </p>
-  <p>
-    <i class="fas fa-tint" style="color:#00add6;"></i> 
-    <span class="dht-labels">Humidity</span>
-    <span id="humidity">%HUMIDITY%</span>
-    <sup class="units">%</sup>
-  </p>
-</body>
-<script>
-setInterval(function ( ) {
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-        var myArr = JSON.parse(this.responseText);
-        document.getElementById("temperature").innerHTML = myArr.Temperature;
-        document.getElementById("humidity").innerHTML = myArr.Humidity;
-    }
-  };
-  xhttp.open("GET", "/readings", true);
-  xhttp.send();
-}, 60000 ) ;
-</script>
-</html>)rawliteral";
-*/

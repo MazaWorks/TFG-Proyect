@@ -18,10 +18,10 @@ export async function getDevicebyRule(rules, allDevices) {
   const ids = new Set();
   if (!allDevices) {
     for (let rule of rules) {
-      ids.add(rule.if.deviceId);
+      ids.add(rule.if.device.deviceId);
       for (let then of rule.then) {
-        if (then.deviceId != null) {
-          ids.add(then.deviceId);
+        if (then.device.deviceId != null) {
+          ids.add(then.device.deviceId);
         }
       }
     }

@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useLayoutEffect} from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,12 @@ import {
   Platform,
 } from 'react-native';
 import {useDimensions} from '@react-native-community/hooks';
-import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {devicesRules} from '../../common/ComponentsUtils';
+import {ScrollView} from 'react-native-gesture-handler';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
-  const [conditions, getConditions] = useState([]);
+  const [conditions, getConditions] = useState(new Map());
   const [value, getValue] = useState({
     indicator: false,
     condition: {description: ''},
@@ -24,25 +24,15 @@ export default function MainView({navigation, route}) {
   const {width, height} = useDimensions().window;
 
   useEffect(() => {
-    setLoading(true);
-    getConditions(devicesRules(route.params.device.type));
+    getConditions(devicesRules(route.params.device.devices));
     setLoading(false);
   }, [route.params]);
 
-  const Item = ({data}) => {
-    return (
-      <TouchableOpacity
-        style={[
-          listStyles.mainContainer,
-          {
-            width: width * 0.8,
-          },
-        ]}
-        onPress={() => getValue({indicator: true, condition: data})}>
-        <Text style={listStyles.name}>{data.description}</Text>
-      </TouchableOpacity>
-    );
-  };
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: route.params.device.name,
+    });
+  });
 
   if (isLoading) {
     return (
@@ -69,28 +59,34 @@ export default function MainView({navigation, route}) {
           Select a condition
         </Text>
       </View>
-      <OptimizedFlatList
-        style={{
-          width: width * 0.8,
-          marginBottom: height * 0.04,
-        }}
-        data={conditions}
-        renderItem={({item}) => <Item data={item} />}
-        containerStyle={listStyles.mainContainer}
-        keyExtractor={(item, index) => index.toString()}
-        numColumns={1}
-        ListHeaderComponent={
-          <View style={listStyles.listheader}>
-            <Text
-              style={{
-                marginLeft: '10%',
-                fontSize: 10,
-              }}>
-              Conditions for {route.params.device.name}
-            </Text>
-          </View>
-        }
-      />
+
+      <ScrollView style={listStyles.scrollView}>
+        {conditions.map((data, key) => {
+          return (
+            <View key={key} style={listStyles.gpioContainer}>
+              <Text style={listStyles.gpioName}>GPIO {key}</Text>
+              {data.map((act, key2) => {
+                return (
+                  <TouchableOpacity
+                    key={key2}
+                    style={[
+                      listStyles.mainContainer,
+                      {
+                        width: width * 0.8,
+                      },
+                    ]}
+                    onPress={() =>
+                      getValue({indicator: true, condition: act, index: key})
+                    }>
+                    <Text style={listStyles.name}>{act.description}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          );
+        })}
+      </ScrollView>
+
       <Modal animationType="slide" transparent={true} visible={value.indicator}>
         <View style={modalStyle.modalContainer}>
           <View
@@ -101,20 +97,30 @@ export default function MainView({navigation, route}) {
                 width: width * 0.9,
               },
             ]}>
-            <Text style={modalStyle.topText}>Type a value</Text>
-            <TextInput
-              style={modalStyle.textInput}
-              textAlign="center"
-              textContentType="name"
-              maxLength={4}
-              keyboardType={
-                value.condition.keyboardType === 1 ? 'numeric' : 'default'
-              }
-              onChangeText={text => {
-                getValue({...value, name: text});
-              }}
-              value={value.name}
-            />
+            <Text style={modalStyle.topText}>
+              {route.params.device.devices[value.index] !== 2
+                ? 'Type a value'
+                : 'Do you want this condition?'}
+            </Text>
+            {route.params.device.devices[value.index] !== 2 ? (
+              <TextInput
+                style={modalStyle.textInput}
+                textAlign="center"
+                textContentType="name"
+                maxLength={4}
+                keyboardType={
+                  value.condition.keyboardType === 1 ? 'numeric' : 'default'
+                }
+                onChangeText={text => {
+                  getValue({...value, name: text});
+                }}
+                value={value.name}
+              />
+            ) : (
+              <Text style={modalStyle.textInput2}>
+                {value.condition.description}
+              </Text>
+            )}
             <View style={modalStyle.modalOptionsContainer}>
               <TouchableOpacity
                 style={modalStyle.modalOptionCancel}
@@ -139,27 +145,39 @@ export default function MainView({navigation, route}) {
                     toret = {
                       if: route.params.if,
                       index: route.params.replace,
-                      deviceId:
-                        route.params.device.type === 0
-                          ? 0
-                          : route.params.device.id,
+                      device: {
+                        deviceId:
+                          route.params.device.type === 0
+                            ? 0
+                            : route.params.device.id,
+                        gpio: value.index,
+                      },
                       condition: {
                         id: value.condition.id,
                         description: value.condition.description.split('(')[0],
-                        value: value.name,
+                        value:
+                          route.params.device.devices[value.index] !== 2
+                            ? value.name
+                            : null,
                       },
                     };
                   } else {
                     toret = {
                       if: route.params.if,
-                      deviceId:
-                        route.params.device.type === 0
-                          ? 0
-                          : route.params.device.id,
+                      device: {
+                        deviceId:
+                          route.params.device.type === 0
+                            ? 0
+                            : route.params.device.id,
+                        gpio: value.index,
+                      },
                       condition: {
                         id: value.condition.id,
                         description: value.condition.description.split('(')[0],
-                        value: value.name,
+                        value:
+                          route.params.device.devices[value.index] !== 2
+                            ? value.name
+                            : null,
                       },
                     };
                   }
@@ -188,7 +206,7 @@ const modalStyle = StyleSheet.create({
   },
   topText: {
     fontWeight: '800',
-    fontSize: 18,
+    fontSize: 16,
     alignSelf: 'center',
     padding: '5%',
   },
@@ -196,7 +214,13 @@ const modalStyle = StyleSheet.create({
     borderBottomWidth: 1,
     borderTopWidth: 1,
     borderColor: 'grey',
-    padding: 5,
+    padding: '2%',
+  },
+  textInput2: {
+    alignSelf: 'center',
+    padding: '2%',
+    fontWeight: '800',
+    fontSize: 20,
   },
   modalOptionsContainer: {
     flexDirection: 'row',
@@ -229,12 +253,8 @@ const listStyles = StyleSheet.create({
   header: {
     alignItems: 'center',
   },
-  listheader: {
-    padding: 2,
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    borderBottomWidth: 2,
-    borderColor: 'gainsboro',
+  scrollView: {
+    marginBottom: 10,
   },
   mainContainer: {
     backgroundColor: 'white',
@@ -244,14 +264,19 @@ const listStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: 'gainsboro',
   },
+  gpioContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  gpioName: {
+    color: '#125c28',
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+  },
   name: {
     fontSize: 12,
     fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    fontStyle: 'italic',
   },
 });
 

@@ -69,9 +69,7 @@ export function imagesDevices(type) {
     case 0:
       return require('../../assets/Devices/clock.png');
     case 1:
-      return require('../../assets/Devices/DHT22.png');
-    case 2:
-      return require('../../assets/Devices/Lampara.png');
+      return require('../../assets/Devices/ESP8266-01.jpeg');
   }
 }
 
@@ -82,21 +80,31 @@ export function nameDefaultDevices(type) {
   }
 }
 
-export function devicesRules(type) {
-  switch (type) {
-    case 0:
-      return [{id: 0, keyboardType: 1, description: 'Wait ? minutes'}];
-    case 1:
-      return [
-        {id: 1, keyboardType: 1, description: 'More than ?º (Temperature)'},
-        {id: 2, keyboardType: 1, description: 'Less than ?º (Temperature)'},
-        {id: 3, keyboardType: 1, description: 'More than ?% (Humidity)'},
-        {id: 4, keyboardType: 1, description: 'Less than ?% (Humidity)'},
-      ];
-    case 2:
-      return [
-        {id: 1, keyboardType: 0, description: 'Turn On'},
-        {id: 2, keyboardType: 0, description: 'Turn Off'},
-      ];
+export function devicesRules(types) {
+  var toret = [];
+  for (let i = 0; i < types.length; i++) {
+    switch (types[i]) {
+      case -1:
+        toret.push([{id: 0, keyboardType: 1, description: 'Wait ? minutes'}]);
+        break;
+      case 0:
+        toret.push([]);
+        break;
+      case 1:
+        toret.push([
+          {id: 0, keyboardType: 1, description: 'More than ?º (Temperature)'},
+          {id: 1, keyboardType: 1, description: 'Less than ?º (Temperature)'},
+          {id: 2, keyboardType: 1, description: 'More than ?% (Humidity)'},
+          {id: 3, keyboardType: 1, description: 'Less than ?% (Humidity)'},
+        ]);
+        break;
+      case 2:
+        toret.push([
+          {id: 0, keyboardType: 0, description: 'Turn Off'},
+          {id: 1, keyboardType: 0, description: 'Turn On'},
+        ]);
+        break;
+    }
   }
+  return toret;
 }

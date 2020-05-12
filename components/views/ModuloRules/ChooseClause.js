@@ -16,13 +16,12 @@ import {getAllData} from '../../common/Dao';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
-  const [devices, getDevices] = useState([]);
+  const [devices, setDevices] = useState([]);
   const {width, height} = useDimensions().window;
 
   useEffect(() => {
-    setLoading(true);
     getAllData('devices').then(value => {
-      getDevices(value);
+      setDevices(value);
       setLoading(false);
     });
   }, []);
@@ -113,7 +112,7 @@ export default function MainView({navigation, route}) {
               navigation.navigate('ClauseByDevice', {
                 ...route.params,
                 device: {
-                  type: 0,
+                  devices: [-1],
                 },
               })
             }>
