@@ -64,8 +64,8 @@ export default function DeviceView({navigation, device}) {
   function sendValues(value, key) {
     var url =
       value === 1
-        ? 'http://' + device.ip + '/turnOn?pin=' + key
-        : 'http://' + device.ip + '/turnOff?pin=' + key;
+        ? 'http://' + device.ip + '/turnOn?gpio=' + key
+        : 'http://' + device.ip + '/turnOff?gpio=' + key;
     fetch(url, {
       method: 'POST',
     })

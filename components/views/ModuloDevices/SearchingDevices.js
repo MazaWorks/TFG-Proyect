@@ -100,7 +100,7 @@ export default function SearchingDevices({navigation}) {
       }
       setLoading(false);
       setDevices(devices);
-    }, 5000);
+    }, 15000);
 
     return (
       <View style={styles.container}>

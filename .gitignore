@@ -28,6 +28,7 @@ DerivedData
 # Arduino
 #
 Arduino/libraries
+Arduino/ESP8266_2
 
 # Android/IntelliJ
 #

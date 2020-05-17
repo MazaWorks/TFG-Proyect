@@ -62,28 +62,35 @@ export default function MainView({navigation, route}) {
 
       <ScrollView style={listStyles.scrollView}>
         {conditions.map((data, key) => {
-          return (
-            <View key={key} style={listStyles.gpioContainer}>
-              <Text style={listStyles.gpioName}>GPIO {key}</Text>
-              {data.map((act, key2) => {
-                return (
-                  <TouchableOpacity
-                    key={key2}
-                    style={[
-                      listStyles.mainContainer,
-                      {
-                        width: width * 0.8,
-                      },
-                    ]}
-                    onPress={() =>
-                      getValue({indicator: true, condition: act, index: key})
-                    }>
-                    <Text style={listStyles.name}>{act.description}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          );
+          if (
+            route.params.if ||
+            (!route.params.if && route.params.device.devices[key] !== 1)
+          ) {
+            return (
+              <View key={key} style={listStyles.gpioContainer}>
+                {route.params.device.devices[0] !== -1 ? (
+                  <Text style={listStyles.gpioName}>GPIO {key}</Text>
+                ) : null}
+                {data.map((act, key2) => {
+                  return (
+                    <TouchableOpacity
+                      key={key2}
+                      style={[
+                        listStyles.mainContainer,
+                        {
+                          width: width * 0.8,
+                        },
+                      ]}
+                      onPress={() =>
+                        getValue({indicator: true, condition: act, index: key})
+                      }>
+                      <Text style={listStyles.name}>{act.description}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            );
+          }
         })}
       </ScrollView>
 
