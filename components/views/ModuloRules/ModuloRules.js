@@ -8,23 +8,21 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Platform,
+  Modal,
 } from 'react-native';
 import {Icon, Button} from 'react-native-elements';
+import TextHttpResponse from './TextHttpResponse/TextHttpResponse';
 import {useDimensions} from '@react-native-community/hooks';
 import {useIsFocused} from '@react-navigation/native';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {imagesDevices} from '../../common/ComponentsUtils';
-import {
-  getAllData,
-  getDevicebyRule,
-  addItem,
-  deleteItem,
-} from '../../common/Dao';
+import {getAllData, getMapDevices, addItem, deleteItem} from '../../common/Dao';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, setDevices] = useState(new Map());
   const [rules, setRules] = useState([]);
+  const [modal, setModal] = useState({indicator: false});
   const [longPress, doLongPress] = useState({
     indicator: false,
     data: {},
@@ -36,19 +34,76 @@ export default function MainView({navigation, route}) {
     if (isFocused) {
       setLoading(true);
       if (route.params != null && route.params.addIndicator) {
-        addItem('rules', rules, route.params.rule, route.params.index).then(
-          value => {
-            getDevicebyRule(value, false).then(value2 => {
-              setDevices(value2);
-              setRules(value);
-              setLoading(false);
-            });
+        var newActuators = [];
+        for (let actuator of route.params.rule.then) {
+          if (actuator.device.deviceId !== undefined) {
+            if (
+              devices.get(route.params.rule.if.device.deviceId).ip !==
+              devices.get(actuator.device.deviceId).ip
+            ) {
+              newActuators.push({
+                id: actuator.id,
+                ip: devices.get(actuator.device.deviceId).ip,
+                gpio: actuator.device.gpio,
+              });
+            } else {
+              newActuators.push({
+                id: actuator.id,
+                gpio: actuator.device.gpio,
+              });
+            }
+          } else {
+            newActuators.push({timer: actuator.value});
+          }
+        }
+        fetch(
+          'http://' +
+            devices.get(route.params.rule.if.device.deviceId).ip +
+            '/automatize',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              if: {
+                id: route.params.rule.if.id,
+                ip: devices.get(route.params.rule.if.device.deviceId).ip,
+                value: route.params.rule.if.value,
+                gpio: route.params.rule.if.device.gpio,
+              },
+              then: newActuators,
+            }),
           },
-        );
-        route.params = null;
+        )
+          .then(response => {
+            if (response.ok) {
+              addItem('rules', rules, route.params.rule, route.params.index)
+                .then(value2 => {
+                  route.params = null;
+                  getMapDevices().then(value3 => {
+                    setDevices(value3);
+                    setRules(value2);
+                    setModal({indicator: true, status: response.status});
+                    setLoading(false);
+                  });
+                })
+                .catch(() => {
+                  setModal({indicator: true, status: -1});
+                  setLoading(false);
+                });
+            } else {
+              setModal({indicator: true, status: response.status});
+              setLoading(false);
+            }
+          })
+          .catch(() => {
+            setModal({indicator: true, status: 0});
+            setLoading(false);
+          });
       } else {
         getAllData('rules').then(value => {
-          getDevicebyRule(value, false).then(value2 => {
+          getMapDevices().then(value2 => {
             setDevices(value2);
             setRules(value);
             setLoading(false);
@@ -111,7 +166,7 @@ export default function MainView({navigation, route}) {
         onPress={() =>
           longPress.indicator
             ? null
-            : navigation.navigate('AddRule', {
+            : navigation.navigate('RA', {
                 rule: data,
                 index: index,
               })
@@ -209,7 +264,7 @@ export default function MainView({navigation, route}) {
               marginBottom: height * 0.05,
             },
           ]}>
-          <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Room</Text>
+          <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Rule</Text>
         </View>
         <View
           style={[
@@ -236,9 +291,37 @@ export default function MainView({navigation, route}) {
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
             title="Find Devices"
-            onPress={() => navigation.navigate('AddRule')}
+            onPress={() => navigation.navigate('RA')}
           />
         </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modal.indicator}>
+          <View style={modalStyle.modalContainer}>
+            <View
+              style={[
+                modalStyle.modelComponentsContainer,
+                {
+                  marginBottom: height * 0.05,
+                  width: width * 0.9,
+                },
+              ]}>
+              <TextHttpResponse status={modal.status} />
+              <View style={modalStyle.modalOptionsContainer}>
+                <TouchableOpacity
+                  style={modalStyle.modalOptionDelete}
+                  onPress={() => {
+                    setModal({
+                      indicator: false,
+                    });
+                  }}>
+                  <Text style={modalStyle.textStyle}>Accept</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -268,7 +351,7 @@ export default function MainView({navigation, route}) {
       {!longPress.indicator && (
         <TouchableOpacity
           style={listStyles.addRoom}
-          onPress={() => navigation.navigate('AddRule')}>
+          onPress={() => navigation.navigate('RA')}>
           <Icon name="add" type="material" color="#125c28" size={40} />
         </TouchableOpacity>
       )}
@@ -281,7 +364,7 @@ export default function MainView({navigation, route}) {
                 indicator: false,
                 data: {},
               });
-              navigation.navigate('AddRule', {
+              navigation.navigate('RA', {
                 rule: longPress.data,
                 index: longPress.index,
               });
@@ -293,24 +376,106 @@ export default function MainView({navigation, route}) {
             style={optionsMenu.iconsContainer}
             onPress={() => {
               setLoading(true);
-              var array = Object.assign([], rules);
-              deleteItem('rules', array, longPress.data).then(value => {
-                setRules(value);
-                doLongPress({
-                  indicator: false,
-                  data: {},
+              fetch(
+                'http://' +
+                  route.params.rule.if.ip +
+                  '/automatize?id=' +
+                  rules.if.id +
+                  '&gpio=' +
+                  rules.if.gpio +
+                  '&value=' +
+                  rules.if.value,
+                {
+                  method: 'DELETE',
+                },
+              )
+                .then(response => {
+                  if (response.ok) {
+                    deleteItem(
+                      'rules',
+                      Object.assign([], rules),
+                      longPress.data,
+                    ).then(value => {
+                      setRules(value);
+                      doLongPress({
+                        indicator: false,
+                        data: {},
+                      });
+                      setLoading(false);
+                    });
+                  } else {
+                    setModal({indicator: true, status: response.status});
+                    setLoading(false);
+                  }
+                })
+                .catch(() => {
+                  setModal({indicator: true, status: 0});
+                  setLoading(false);
                 });
-                setLoading(false);
-              });
             }}>
             <Icon name="delete" size={30} />
             <Text style={optionsMenu.text}>Delete</Text>
           </TouchableOpacity>
         </View>
       )}
+      <Modal animationType="slide" transparent={true} visible={modal.indicator}>
+        <View style={modalStyle.modalContainer}>
+          <View
+            style={[
+              modalStyle.modelComponentsContainer,
+              {
+                marginBottom: height * 0.05,
+                width: width * 0.9,
+              },
+            ]}>
+            <TextHttpResponse status={modal.status} />
+            <View style={modalStyle.modalOptionsContainer}>
+              <TouchableOpacity
+                style={modalStyle.modalOptionDelete}
+                onPress={() => {
+                  setModal({
+                    indicator: false,
+                  });
+                }}>
+                <Text style={modalStyle.textStyle}>Accept</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
+
+const modalStyle = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  modelComponentsContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+  },
+  modalOptionsContainer: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderColor: 'grey',
+    flexDirection: 'row',
+  },
+  modalOptionDelete: {
+    flex: 1,
+    padding: 10,
+    borderLeftWidth: 1,
+    borderColor: 'grey',
+  },
+  textStyle: {
+    alignSelf: 'center',
+    fontWeight: '500',
+    fontSize: 15,
+  },
+});
 
 const listStyles = StyleSheet.create({
   container: {

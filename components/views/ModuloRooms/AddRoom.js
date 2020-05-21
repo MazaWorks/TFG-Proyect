@@ -20,7 +20,7 @@ export default function TypeRoom({navigation, route}) {
         <TouchableOpacity
           style={styles.iconHeaderContainer}
           onPress={() => {
-            navigation.navigate('Home', {
+            navigation.navigate('ROH', {
               newRooms: {
                 idRoom: route.params.itemId,
                 name: roomName,

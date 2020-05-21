@@ -97,9 +97,7 @@ export default function MainView({navigation, route}) {
           },
         ]}
         onPress={() =>
-          longPress.indicator
-            ? null
-            : navigation.navigate('DeviceView', {device: data})
+          longPress.indicator ? null : navigation.navigate('DV', {device: data})
         }
         onLongPress={() => {
           doLongPress({indicator: true, data: data});
@@ -174,7 +172,7 @@ export default function MainView({navigation, route}) {
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
             title="Find Devices"
-            onPress={() => navigation.navigate('SearchingDevices')}
+            onPress={() => navigation.navigate('DS')}
           />
         </View>
       </View>
@@ -207,7 +205,7 @@ export default function MainView({navigation, route}) {
       {!longPress.indicator && (
         <TouchableOpacity
           style={listStyles.addRoom}
-          onPress={() => navigation.navigate('SearchingDevices')}>
+          onPress={() => navigation.navigate('DS')}>
           <Icon name="add" type="material" color="#ffc400" size={40} />
         </TouchableOpacity>
       )}

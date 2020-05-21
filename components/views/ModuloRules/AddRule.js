@@ -13,7 +13,7 @@ import {
 import {Icon, Button} from 'react-native-elements';
 import {useDimensions} from '@react-native-community/hooks';
 import {imagesDevices} from '../../common/ComponentsUtils';
-import {getDevicebyRule} from '../../common/Dao';
+import {getMapDevices} from '../../common/Dao';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(false);
@@ -34,12 +34,12 @@ export default function MainView({navigation, route}) {
       setMeasurer(replace.rule.if);
       setActuators(replace.rule.then);
       whereAreWe(false);
-      getDevicebyRule([replace.rule], true).then(value => {
+      getMapDevices().then(value => {
         setDevices(value);
         setLoading(false);
       });
     } else {
-      getDevicebyRule(null, true).then(value => {
+      getMapDevices().then(value => {
         setDevices(value);
         setLoading(false);
       });
@@ -63,24 +63,15 @@ export default function MainView({navigation, route}) {
         whereAreWe(false);
       } else {
         var newValue = Object.assign([], actuators);
-        var newActuator;
-        if (route.params.device.deviceId !== -1) {
-          newActuator = {
-            id: route.params.condition.id,
-            description: route.params.condition.description,
-            value: route.params.condition.value,
-            device: {
-              deviceId: route.params.device.deviceId,
-              gpio: route.params.device.gpio,
-            },
-          };
-        } else {
-          newActuator = {
-            id: route.params.condition.id,
-            description: route.params.condition.description,
-            value: route.params.condition.value,
-          };
-        }
+        var newActuator = {
+          id: route.params.condition.id,
+          description: route.params.condition.description,
+          value: route.params.condition.value,
+          device: {
+            deviceId: route.params.device.deviceId,
+            gpio: route.params.device.gpio,
+          },
+        };
         if (route.params.index == null) {
           newValue.push(newActuator);
         } else {
@@ -119,19 +110,14 @@ export default function MainView({navigation, route}) {
               style={noDeviceStyles.iconHeaderContainer}
               onPress={() => {
                 var toret;
-                if (replace == null) {
-                  toret = {
-                    rule: {if: measurer, then: actuators},
-                    addIndicator: true,
-                  };
-                } else {
-                  toret = {
-                    rule: {if: measurer, then: actuators},
-                    addIndicator: true,
-                    index: replace.index,
-                  };
+                toret = {
+                  rule: {if: measurer, then: actuators},
+                  addIndicator: true,
+                };
+                if (replace != null) {
+                  toret = {...toret, index: replace.index};
                 }
-                navigation.navigate('ModuloRules', toret);
+                navigation.navigate('RM', toret);
               }}>
               <Icon name="done" size={30} />
             </TouchableOpacity>
@@ -159,7 +145,7 @@ export default function MainView({navigation, route}) {
           return (
             <TouchableOpacity
               style={noDeviceStyles.iconHeaderContainer}
-              onPress={() => navigation.navigate('ModuloRules')}>
+              onPress={() => navigation.navigate('RM')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           );
@@ -342,7 +328,7 @@ export default function MainView({navigation, route}) {
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
             title="Add a Clause"
-            onPress={() => navigation.navigate('ChooseClause', {if: onIf})}
+            onPress={() => navigation.navigate('RCH', {if: onIf})}
           />
         </View>
       </View>
@@ -368,7 +354,7 @@ export default function MainView({navigation, route}) {
       {!press.indicator && (
         <TouchableOpacity
           style={listStyles.addRoom}
-          onPress={() => navigation.navigate('ChooseClause', {if: onIf})}>
+          onPress={() => navigation.navigate('RCH', {if: onIf})}>
           <Icon name="add" type="material" color="#125c28" size={40} />
         </TouchableOpacity>
       )}
@@ -381,7 +367,7 @@ export default function MainView({navigation, route}) {
                 indicator: false,
                 data: {},
               });
-              navigation.navigate('ChooseClause', {
+              navigation.navigate('RCH', {
                 if: press.index === 0 ? true : false,
                 replace: press.index - 1,
               });

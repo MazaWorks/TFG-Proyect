@@ -143,52 +143,32 @@ export default function MainView({navigation, route}) {
                 style={modalStyle.modalOptionDelete}
                 activeOpacity={value.name === '5' ? 0.2 : 1}
                 onPress={() => {
-                  var toret;
+                  var toret = {
+                    if: route.params.if,
+                    device: {
+                      deviceId: route.params.device.id,
+                      gpio: value.index,
+                    },
+                    condition: {
+                      id: value.condition.id,
+                      description: value.condition.description.split('(')[0],
+                      value:
+                        route.params.device.devices[value.index] !== 2
+                          ? value.name
+                          : null,
+                    },
+                  };
                   getValue({
                     indicator: false,
                     condition: {description: ''},
                   });
                   if (route.params.replace != null) {
                     toret = {
-                      if: route.params.if,
+                      ...toret,
                       index: route.params.replace,
-                      device: {
-                        deviceId:
-                          route.params.device.type === 0
-                            ? 0
-                            : route.params.device.id,
-                        gpio: value.index,
-                      },
-                      condition: {
-                        id: value.condition.id,
-                        description: value.condition.description.split('(')[0],
-                        value:
-                          route.params.device.devices[value.index] !== 2
-                            ? value.name
-                            : null,
-                      },
-                    };
-                  } else {
-                    toret = {
-                      if: route.params.if,
-                      device: {
-                        deviceId:
-                          route.params.device.type === 0
-                            ? 0
-                            : route.params.device.id,
-                        gpio: value.index,
-                      },
-                      condition: {
-                        id: value.condition.id,
-                        description: value.condition.description.split('(')[0],
-                        value:
-                          route.params.device.devices[value.index] !== 2
-                            ? value.name
-                            : null,
-                      },
                     };
                   }
-                  navigation.navigate('AddRule', toret);
+                  navigation.navigate('RA', toret);
                 }}>
                 <Text style={modalStyle.textStyle}>Accept</Text>
               </TouchableOpacity>

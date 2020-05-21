@@ -14,6 +14,7 @@ import {
 import {Icon, ListItem, Button} from 'react-native-elements';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {useDimensions} from '@react-native-community/hooks';
+import {useIsFocused} from '@react-navigation/native';
 import {iconsRooms} from '../../common/ComponentsUtils';
 import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
 
@@ -26,23 +27,26 @@ export default function MainView({navigation, route}) {
   });
   const [rooms, getRooms] = useState([]);
   const {width, height} = useDimensions().window;
+  const isFocused = useIsFocused();
 
   useEffect(() => {
-    setLoading(true);
-    if (route.params != null && route.params.addIndicator) {
-      addItem('rooms', rooms, route.params.newRooms, null).then(value => {
-        getRooms(value);
-        setLoading(false);
-      });
-      route.params = null;
-    } else {
-      getAllData('rooms').then(value => {
-        getRooms(value);
-        setLoading(false);
-      });
+    if (isFocused) {
+      setLoading(true);
+      if (route.params != null && route.params.addIndicator) {
+        addItem('rooms', rooms, route.params.newRooms, null).then(value => {
+          getRooms(value);
+          setLoading(false);
+        });
+        route.params = null;
+      } else {
+        getAllData('rooms').then(value => {
+          getRooms(value);
+          setLoading(false);
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.params]);
+  }, [route.params, isFocused]);
 
   useLayoutEffect(() => {
     if (!longPress.indicator) {
@@ -102,7 +106,7 @@ export default function MainView({navigation, route}) {
           onPress={() =>
             longPress.indicator
               ? null
-              : navigation.navigate('RoomView', {data: data})
+              : navigation.navigate('ROV', {data: data})
           }
           onLongPress={() => {
             doLongPress({indicator: true, data: data});
@@ -160,7 +164,7 @@ export default function MainView({navigation, route}) {
             titleStyle={styles.noDeviceButtonText}
             type="outline"
             title="Let's add rooms"
-            onPress={() => navigation.navigate('TypeRoom', {rooms: rooms})}
+            onPress={() => navigation.navigate('ROT', {rooms: rooms})}
           />
         </View>
       </View>
@@ -191,7 +195,7 @@ export default function MainView({navigation, route}) {
       {!longPress.indicator && (
         <TouchableOpacity
           style={styles.addRoom}
-          onPress={() => navigation.navigate('TypeRoom')}>
+          onPress={() => navigation.navigate('ROT')}>
           <Icon name="add" type="material" color="#ffc400" size={40} />
         </TouchableOpacity>
       )}
@@ -200,7 +204,7 @@ export default function MainView({navigation, route}) {
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
             onPress={() => {
-              navigation.navigate('AddDevice', {data: longPress.data});
+              navigation.navigate('RODA', {data: longPress.data});
               doLongPress({
                 indicator: false,
                 data: {},

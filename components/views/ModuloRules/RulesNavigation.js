@@ -11,9 +11,9 @@ const Stack = createStackNavigator();
 
 export default function RulesNavigation({navigation}) {
   return (
-    <Stack.Navigator initialRouteName="ModuloRules">
+    <Stack.Navigator initialRouteName="RM">
       <Stack.Screen
-        name="ModuloRules"
+        name="RM"
         component={MainView}
         options={{
           title: 'Rules',
@@ -30,7 +30,7 @@ export default function RulesNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="AddRule"
+        name="RA"
         component={AddRule}
         options={{
           title: 'New Rule',
@@ -46,13 +46,13 @@ export default function RulesNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="ChooseClause"
+        name="RCH"
         component={ChooseClause}
         options={{
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('AddRule')}>
+              onPress={() => navigation.navigate('RA')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),
@@ -69,13 +69,13 @@ export default function RulesNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="ClauseByDevice"
+        name="RCD"
         component={ClauseByDevice}
         options={{
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('ChooseClause')}>
+              onPress={() => navigation.navigate('RCH')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),

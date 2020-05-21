@@ -12,6 +12,7 @@ import dgram from 'dgram';
 export default function SearchingDevices({navigation}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, setDevices] = useState([]);
+  var [abort] = useState(false);
   const {width, height} = useDimensions().window;
 
   function toByteArray(obj) {
@@ -29,7 +30,7 @@ export default function SearchingDevices({navigation}) {
           <TouchableOpacity
             style={styles.iconHeaderContainer}
             onPress={() => {
-              navigation.navigate('ModuloDevices', {
+              navigation.navigate('DM', {
                 newDevices: devices,
                 addIndicator: true,
               });
@@ -40,6 +41,19 @@ export default function SearchingDevices({navigation}) {
         headerRightContainerStyle: {marginRight: '5%'},
       });
     }
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          style={styles.iconHeaderContainer}
+          onPress={() => {
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+            abort = true;
+            navigation.navigate('DM');
+          }}>
+          <Icon name="arrow-left" type="material-community" />
+        </TouchableOpacity>
+      ),
+    });
   }, [devices, navigation]);
 
   const renderItem = ({item}) => {
@@ -79,28 +93,32 @@ export default function SearchingDevices({navigation}) {
     });
 
     socket.on('message', function(data, rinfo) {
-      var json = JSON.parse(
-        String.fromCharCode.apply(null, new Uint8Array(data)),
-      );
-      devicesFound.add(
-        JSON.stringify({
-          ...json,
-          ip: rinfo.address,
-          name: nameDefaultDevices(json.type),
-        }),
-      );
+      if (!abort) {
+        var json = JSON.parse(
+          String.fromCharCode.apply(null, new Uint8Array(data)),
+        );
+        devicesFound.add(
+          JSON.stringify({
+            ...json,
+            ip: rinfo.address,
+            name: nameDefaultDevices(json.type),
+          }),
+        );
+      }
     });
 
     const interval = setInterval(() => {
       socket.close();
       clearInterval(interval);
-      var devices = [];
-      for (let device of devicesFound) {
-        devices.push(JSON.parse(device));
+      if (!abort) {
+        var devices = [];
+        for (let device of devicesFound) {
+          devices.push(JSON.parse(device));
+        }
+        setLoading(false);
+        setDevices(devices);
       }
-      setLoading(false);
-      setDevices(devices);
-    }, 15000);
+    }, 10000);
 
     return (
       <View style={styles.container}>

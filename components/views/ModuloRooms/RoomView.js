@@ -41,7 +41,7 @@ export default function RoomView({navigation, route}) {
     var srcImage = imagesDevices(item.type);
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate('DeviceView', {device: item})}>
+        onPress={() => navigation.navigate('RODV', {device: item})}>
         <View>
           <Image
             source={srcImage}

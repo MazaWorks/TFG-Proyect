@@ -10,11 +10,12 @@ const Stack = createStackNavigator();
 
 export default function DevicesNavigation({navigation}) {
   return (
-    <Stack.Navigator initialRouteName="ModuloDevices">
+    <Stack.Navigator initialRouteName="DM">
       <Stack.Screen
-        name="ModuloDevices"
+        name="DM"
         component={MainView}
         options={{
+          title: 'Devices',
           headerStyle: {
             backgroundColor: '#1e5885',
           },
@@ -28,13 +29,13 @@ export default function DevicesNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="DeviceView"
+        name="DV"
         component={DeviceView}
         options={{
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('ModuloDevices')}>
+              onPress={() => navigation.navigate('DM')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),
@@ -51,16 +52,10 @@ export default function DevicesNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="SearchingDevices"
+        name="DS"
         component={SearchingDevices}
         options={{
-          headerLeft: () => (
-            <TouchableOpacity
-              style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('ModuloDevices')}>
-              <Icon name="arrow-left" type="material-community" />
-            </TouchableOpacity>
-          ),
+          title: 'Scanner',
           headerStyle: {
             backgroundColor: '#1e5885',
           },

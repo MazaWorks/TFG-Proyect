@@ -15,7 +15,7 @@ export default function RoomsNavigation({navigation}) {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Home"
+        name="ROH"
         component={MainView}
         options={{
           title: 'Home',
@@ -27,14 +27,14 @@ export default function RoomsNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="AddDevice"
+        name="RODA"
         component={AddDevices}
         options={{
           title: 'Replace',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('Home')}>
+              onPress={() => navigation.navigate('ROH')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),
@@ -51,13 +51,13 @@ export default function RoomsNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="TypeRoom"
+        name="ROT"
         component={TypeRoom}
         options={{
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('Home')}>
+              onPress={() => navigation.navigate('ROH')}>
               <Icon name="close" size={30} />
             </TouchableOpacity>
           ),
@@ -71,13 +71,13 @@ export default function RoomsNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="AddRoom"
+        name="ROA"
         component={AddRoom}
         options={{
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('Home')}>
+              onPress={() => navigation.navigate('ROT')}>
               <Icon name="close" size={30} />
             </TouchableOpacity>
           ),
@@ -91,13 +91,13 @@ export default function RoomsNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="RoomView"
+        name="ROV"
         component={RoomView}
         options={{
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('Home')}>
+              onPress={() => navigation.navigate('ROH')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),
@@ -112,13 +112,13 @@ export default function RoomsNavigation({navigation}) {
         }}
       />
       <Stack.Screen
-        name="DeviceView"
+        name="RODV"
         component={DeviceView}
         options={{
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
-              onPress={() => navigation.navigate('RoomView')}>
+              onPress={() => navigation.navigate('ROV')}>
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),

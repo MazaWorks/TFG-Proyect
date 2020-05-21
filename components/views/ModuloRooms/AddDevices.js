@@ -39,11 +39,9 @@ export default function MainView({navigation, route}) {
           <TouchableOpacity
             style={noDeviceStyles.iconHeaderContainer}
             onPress={() => {
-              addDeviceToRoom(route.params.data, devices, press.data).then(
-                () => {
-                  navigation.navigate('Home', {addIndicator: false});
-                },
-              );
+              addDeviceToRoom(route.params.data, press.data).then(() => {
+                navigation.navigate('ROH', {addIndicator: false});
+              });
             }}>
             <Icon name="add" size={30} />
           </TouchableOpacity>
@@ -206,15 +204,6 @@ const listStyles = StyleSheet.create({
     fontSize: 10,
     fontWeight: 'bold',
     fontStyle: 'italic',
-  },
-  addRoom: {
-    position: 'absolute',
-    right: '5%',
-    bottom: '5%',
-    backgroundColor: '#83c965',
-    padding: 10,
-    borderRadius: 100,
-    justifyContent: 'center',
   },
 });
 

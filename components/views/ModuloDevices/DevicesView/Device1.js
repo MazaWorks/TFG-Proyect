@@ -27,37 +27,56 @@ export default function DeviceView({navigation, device}) {
   });
 
   useEffect(() => {
+    var abort = false;
     fetch('http://' + device.ip + '/readings')
       .then(response => response.json())
       .then(json => {
-        getReadings(json.Values);
+        if (!abort) {
+          getReadings(json.Values);
+        }
       })
       .catch(error => {
-        setErrorRequest({
-          indicator: true,
-          error: error.message,
-        });
+        if (!abort) {
+          setErrorRequest({
+            indicator: true,
+            error: error.message,
+          });
+        }
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!abort) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      abort = true;
+    };
   }, [device.ip]);
 
   useEffect(() => {
+    var abort = false;
     if (hasDHT) {
       const interval = setInterval(() => {
         fetch('http://' + device.ip + '/readings')
           .then(response => response.json())
           .then(json => {
-            getReadings(json.Values);
+            if (!abort) {
+              getReadings(json.Values);
+            }
           })
           .catch(error => {
-            setErrorRequest({
-              indicator: true,
-              error: error.message,
-            });
-            getReadings([]);
+            if (!abort) {
+              setErrorRequest({
+                indicator: true,
+                error: error.message,
+              });
+            }
           });
       }, 60000);
-      return () => clearInterval(interval);
+      return () => {
+        abort = true;
+        clearInterval(interval);
+      };
     }
   }, [device.ip, hasDHT]);
 

@@ -25,10 +25,13 @@ WiFiUDP Udp;
 byte i;
 byte i2;
 float t = 0.0;
+float newT = 0.0;
 float h = 0.0;
+float newH = 0.0;
+unsigned long currentMillis;
 unsigned long previousMillis = 0;
 const long interval = 60000;
-const int gpioTypes[4] = {1,2,2,2};
+const byte gpioTypes[4] = {1,2,2,2};
 // Change "id", "type 1" => ESP8266, "devices" most be types of GPIO
 const char responseUDP[50] = "{\"id\": 1,\"type\": 1,\"devices\": [1,2,2,2]}";
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
@@ -37,24 +40,28 @@ char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
 const char rulesToSend[2][8] = {"turnOff", "turnOn"};
 StaticJsonDocument<JSON_OBJECT_SIZE(2) + 20 * JSON_OBJECT_SIZE(3)> doc;
 // Información de las reglas
-boolean mesurerActive[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
-int mesurerId[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
-int mesurerTypeGpio[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
-int mesurerGpio[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
-int mesurerValues[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
-int thenSize[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
-int ToSendLocal[NUMRULES][MAXIPS];
+byte mesurerActive[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
+byte mesurerId[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
+byte mesurerTypeGpio[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
+byte mesurerGpio[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
+short mesurerValues[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
+byte thenSize[NUMRULES];
+byte thenType[NUMRULES][MAXIPS];
 char ipsToSend[NUMRULES][MAXIPS][IPSIZE];
-int typeGpio = 0;
+byte typeGpio = 0;
+// Información del timer
+unsigned long rulesTimerMillies[NUMRULES];
+unsigned long rulesTimerPrevMillies[NUMRULES];
+byte rulesToContinue[NUMRULES] = {0,0,0,0,0,0,0,0,0,0};
 // Indicadores de regla
-boolean added = 0;
-boolean existe = 0;
+byte added = 0;
+byte existe = 0;
 // Rules IDs
-int id = 0;
-int gpio = 0;
-int value = 0;
+byte id = 0;
+byte gpio = 0;
+short value = 0;
 // Regla que se procederá a ejecutar
-int ruleToExecute = -1;
+byte ruleToExecute = 0;
 // RequestBody recibido
 String body;
 
@@ -100,7 +107,7 @@ void automatize(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_
         existe = 0;
         for (i = 0; i < NUMRULES; i++) {
           if(mesurerId[i] == id && mesurerGpio[i] == gpio && mesurerValues[i] == value) {
-            existe = 1;
+            existe = i + 1;
             break;
           }
         }
@@ -117,12 +124,16 @@ void automatize(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_
               for (i2 = 0; i2 < then.size(); i2++) {
                 act = then[i2].as<JsonObject>();
                 String ip = act["ip"].as<String>();
-                if(ip != "null"){
+                String timer = act["timer"].as<String>();
+                if(ip != "null") {
                   String("http://" + ip + "/" + rulesToSend[act["id"].as<int>()] + "?gpio=" + act["gpio"].as<String>()).toCharArray(ipsToSend[i][i2], IPSIZE);
-                  ToSendLocal[i][i2] = 0;
+                  thenType[i][i2] = 0;
+                } else if(timer != "null") {
+                  String(timer).toCharArray(ipsToSend[i][i2], IPSIZE);
+                  thenType[i][i2] = 1;
                 } else {
                   String(act["gpio"].as<String>() + act["id"].as<String>()).toCharArray(ipsToSend[i][i2], IPSIZE);
-                  ToSendLocal[i][i2] = 1;
+                  thenType[i][i2] = 2;
                 }
               }
               mesurerActive[i] = 1;
@@ -130,10 +141,33 @@ void automatize(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_
               break;
             }
           }
+        } else {
+          JsonObject act;
+          JsonArray then = doc["then"].as<JsonArray>();
+          thenSize[existe - 1] = then.size();
+          for (i2 = 0; i2 < then.size(); i2++) {
+            act = then[i2].as<JsonObject>();
+            String ip = act["ip"].as<String>();
+            String timer = act["timer"].as<String>();
+            if(ip != "null") {
+              String("http://" + ip + "/" + rulesToSend[act["id"].as<int>()] + "?gpio=" + act["gpio"].as<String>()).toCharArray(ipsToSend[existe - 1][i2], IPSIZE);
+              thenType[existe - 1][i2] = 0;
+            } else if(timer != "null") {
+              String(timer).toCharArray(ipsToSend[existe - 1][i2], IPSIZE);
+              thenType[existe - 1][i2] = 1;
+            } else {
+              String(act["gpio"].as<String>() + act["id"].as<String>()).toCharArray(ipsToSend[existe - 1][i2], IPSIZE);
+              thenType[existe - 1][i2] = 2;
+            }
+          }
+          mesurerActive[existe - 1] = 1;
+          added = 2;
         }
       }
-      if(added) {
+      if(added == 1) {
         request->send(201);
+      } else if(added == 2){
+        request->send(200);
       } else {
         request->send(409);
       }
@@ -176,7 +210,7 @@ void activateRuleType2(int gpio, boolean on) {
 }
 
 void setup() {
-  // Serial.begin(9600);
+  //Serial.begin(9600);
   // Pins set as output
   //pinMode(0, OUTPUT);
   pinMode(1, OUTPUT);
@@ -203,7 +237,7 @@ void setup() {
         request->send_P(200, "application/json", readResponse, processor);
         activateRuleType2(gpio, HIGH);
       } else {
-        request->send(404);
+        request->send(400);
       }
     } else {
       request->send(400);
@@ -218,7 +252,7 @@ void setup() {
         request->send_P(200, "application/json", readResponse, processor);
         activateRuleType2(gpio, LOW);
       } else {
-        request->send(404);
+        request->send(400);
       }
     } else {
       request->send(400);
@@ -252,7 +286,7 @@ void setup() {
         }
         request->send(200);
       } else {
-        request->send(404);
+        request->send(400);
       }
     } else {
       request->send(400);
@@ -264,9 +298,20 @@ void setup() {
 
   Udp.begin(8080);
   server.begin();
+  
+  newT = dht.readTemperature();
+  newH = dht.readHumidity();
+  if (!(isnan(newT) || isnan(newH)))
+  {
+    t = newT;
+    h = newH;
+    activateRuleType1(t,h);
+  }
 }
 
 void loop() {
+  currentMillis = millis();
+
   int packetSize = Udp.parsePacket();
   if (packetSize) {
     int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
@@ -279,76 +324,119 @@ void loop() {
       Udp.endPacket();
     }
   }
+
+  for (i = 0; i < NUMRULES; i++) {
+    if(rulesTimerMillies[i] != 0) {
+      if(currentMillis - rulesTimerPrevMillies[i] >= rulesTimerMillies[i]) {
+        mesurerActive[i] = 1;
+        rulesTimerMillies[i] = 0;
+      }
+    }
+  }
   
   for (i = 0; i < NUMRULES; i++) {
     if(mesurerActive[i]) {
       if(mesurerTypeGpio[i] == 1) {
         if(mesurerId[i] == 0) {
           if(t > mesurerValues[i]) {
-            ruleToExecute = i;
+            ruleToExecute = i + 1;
             break;
           }
         } else if(mesurerId[i] == 1) {
           if(t < mesurerValues[i]) {
-            ruleToExecute = i;
+            ruleToExecute = i + 1;
             break;
           }
         } else if(mesurerId[i] == 2) {
           if(h > mesurerValues[i]) {
-            ruleToExecute = i;
+            ruleToExecute = i + 1;
             break;
           }
         } else if(mesurerId[i] == 3) {
           if(h < mesurerValues[i]) {
-            ruleToExecute = i;
+            ruleToExecute = i + 1;
             break;
           }
         }
       } else if(mesurerTypeGpio[i] == 2) {
         if(mesurerId[i] == 0) {
           if(!digitalRead(mesurerGpio[i])) {
-            ruleToExecute = i;
+            ruleToExecute = i + 1;
             break;
           }
         }
         if(mesurerId[i] == 1) {
           if(digitalRead(mesurerGpio[i])) {
-            ruleToExecute = i;
+            ruleToExecute = i + 1;
             break;
           }
         }
       }
+      if(rulesToContinue[i]) {
+        ruleToExecute = i + 1;
+        break;
+      }
     }
   }
-  
-  if (ruleToExecute != -1) {
-    mesurerActive[ruleToExecute] = 0;
-    for (i = 0; i < thenSize[ruleToExecute]; i++) {
-      if(ToSendLocal[ruleToExecute][i]) {
-        digitalWrite(String(ipsToSend[ruleToExecute][i][0]).toInt() , String(ipsToSend[ruleToExecute][i][1]).toInt());
-        activateRuleType2(String(ipsToSend[ruleToExecute][i][0]).toInt(), String(ipsToSend[ruleToExecute][i][1]).toInt());
+  if (ruleToExecute) {
+    mesurerActive[ruleToExecute - 1] = 0;
+    for (i = rulesToContinue[ruleToExecute - 1]; i < thenSize[ruleToExecute - 1]; i++) {
+      if(rulesToContinue[ruleToExecute - 1]) {
+        rulesToContinue[ruleToExecute - 1] = 0;
+      }
+      if(thenType[ruleToExecute - 1][i] == 2) {
+        digitalWrite(String(ipsToSend[ruleToExecute - 1][i][0]).toInt(), String(ipsToSend[ruleToExecute - 1][i][1]).toInt());
+        activateRuleType2(String(ipsToSend[ruleToExecute - 1][i][0]).toInt(), String(ipsToSend[ruleToExecute - 1][i][1]).toInt());
+      } else if(thenType[ruleToExecute - 1][i] == 1) {
+        rulesToContinue[ruleToExecute - 1] = i + 1;
+        rulesTimerMillies[ruleToExecute - 1] = String(ipsToSend[ruleToExecute - 1][i]).toInt() * 1000;
+        rulesTimerPrevMillies[ruleToExecute - 1] = currentMillis;
+        break;
       } else {
         WiFiClient client;
         HTTPClient http;
-        delay(5000);
-        http.begin(client, ipsToSend[ruleToExecute][i]);
+        delay(3000);
+        http.begin(client, ipsToSend[ruleToExecute - 1][i]);
         http.POST("");
         http.end();
       }
     }
-    ruleToExecute = -1;
+    ruleToExecute = 0;
   }
 
-  unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
-    float newT = dht.readTemperature();
-    float newH = dht.readHumidity();
-    if (!(isnan(newT) || isnan(newH)))
-    {
+    newT = dht.readTemperature();
+    newH = dht.readHumidity();
+    if (!(isnan(newT) || isnan(newH))) {
       t = newT;
       h = newH;
       activateRuleType1(t,h);
     }
   }
 }
+/*
+  Serial.print("rule: ");
+  Serial.print(i);
+  Serial.print(" | ");
+  Serial.print("active: ");
+  Serial.print(mesurerActive[i]);
+  Serial.print(" | ");
+  Serial.print("id: ");
+  Serial.print(mesurerId[i]);
+  Serial.print(" | ");
+  Serial.print("gpio: ");
+  Serial.print(mesurerGpio[i]);
+  Serial.print(" | ");
+  Serial.print("value: ");
+  Serial.print(mesurerValues[i]);
+  Serial.print(" | ");
+  Serial.print("thenSize: ");
+  Serial.print(thenSize[i]);
+  Serial.print(" | ");
+  Serial.print("rulesToContinue: ");
+  Serial.print(rulesToContinue[i]);
+  Serial.print(" | ");
+  Serial.print("ruleToExecute: ");
+  Serial.println(ruleToExecute);
+*/

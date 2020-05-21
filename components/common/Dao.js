@@ -14,31 +14,13 @@ export function getAllData(item) {
     });
 }
 
-export async function getDevicebyRule(rules, allDevices) {
-  const ids = new Set();
-  if (!allDevices) {
-    for (let rule of rules) {
-      ids.add(rule.if.device.deviceId);
-      for (let then of rule.then) {
-        if (then.device.deviceId != null) {
-          ids.add(then.device.deviceId);
-        }
-      }
-    }
-  }
+export async function getMapDevices() {
   return AsyncStorage.getItem('devices')
     .then(value => {
       const toret = new Map();
       if (value != null && value !== '') {
-        var allData = JSON.parse(value);
-        for (let device of allData) {
-          if (!allDevices) {
-            if (ids.has(device.id)) {
-              toret.set(device.id, device);
-            }
-          } else {
-            toret.set(device.id, device);
-          }
+        for (let device of JSON.parse(value)) {
+          toret.set(device.id, device);
         }
       }
       return toret;
@@ -110,10 +92,10 @@ export async function renameItem(name, array, item, newName) {
       console.log('Error: ' + error.message);
     });
 }
-
-export async function addDeviceToRoom(room, devices, items) {
+export async function addDeviceToRoom(room, items) {
   var añade = false;
   var mapNumberDevices = new Map();
+  var devices = await getAllData('devices');
   for (let item of items) {
     if (mapNumberDevices.has(item.room)) {
       mapNumberDevices.set(item.room, mapNumberDevices.get(item.room) + 1);
@@ -121,7 +103,7 @@ export async function addDeviceToRoom(room, devices, items) {
       mapNumberDevices.set(item.room, 1);
     }
     for (let device of devices) {
-      if (device.ip === item.ip) {
+      if (device.id === item.id) {
         device.room = room.name;
         añade = true;
         break;
@@ -159,10 +141,13 @@ export async function addItem(name, array, item, index) {
       newValue.push(item);
     }
   } else if (name === 'devices') {
-    for (var elements of item) {
+    addDevices = true;
+    for (let elements of item) {
       var add = true;
       for (var elements2 of newValue) {
         if (elements.id === elements2.id) {
+          elements2.ip = elements.ip;
+          elements2.devices = elements.devices;
           add = false;
           break;
         } else if (elements.name === elements2.name.split('_')[0]) {
@@ -176,7 +161,6 @@ export async function addItem(name, array, item, index) {
           elements.name = elements.name + '_' + diffName;
         }
         newValue.push(elements);
-        addDevices = true;
       }
     }
   } else if (name === 'rooms') {

@@ -52,7 +52,7 @@ export default function TypeRoom({navigation, route}) {
   const renderItem = ({item}) => (
     <TouchableOpacity
       onPress={() =>
-        navigation.navigate('AddRoom', {
+        navigation.navigate('ROA', {
           itemId: item.id,
           itemName: item.room,
         })

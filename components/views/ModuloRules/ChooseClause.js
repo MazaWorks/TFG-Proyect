@@ -36,12 +36,12 @@ export default function MainView({navigation, route}) {
             width: width * 0.8,
           },
         ]}
-        onPress={() =>
-          navigation.navigate('ClauseByDevice', {
+        onPress={() => {
+          navigation.navigate('RCD', {
             ...route.params,
             device: data,
-          })
-        }>
+          });
+        }}>
         <Image
           source={srcImage}
           style={[
@@ -109,7 +109,7 @@ export default function MainView({navigation, route}) {
               {marginBottom: height * 0.01, width: width * 0.8},
             ]}
             onPress={() =>
-              navigation.navigate('ClauseByDevice', {
+              navigation.navigate('RCD', {
                 ...route.params,
                 device: {
                   devices: [-1],
