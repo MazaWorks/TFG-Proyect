@@ -32,6 +32,7 @@ export default function DevicesNavigation({navigation}) {
         name="DV"
         component={DeviceView}
         options={{
+          title: 'DeviceView',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}

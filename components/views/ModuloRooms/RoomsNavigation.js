@@ -30,12 +30,11 @@ export default function RoomsNavigation({navigation}) {
         name="RODA"
         component={AddDevices}
         options={{
-          title: 'Replace',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
               onPress={() => navigation.navigate('ROH')}>
-              <Icon name="arrow-left" type="material-community" />
+              <Icon name="arrow-left" type="material-community" size={30} />
             </TouchableOpacity>
           ),
           headerStyle: {
@@ -78,7 +77,7 @@ export default function RoomsNavigation({navigation}) {
             <TouchableOpacity
               style={styles.iconHeaderContainer}
               onPress={() => navigation.navigate('ROT')}>
-              <Icon name="close" size={30} />
+              <Icon name="arrow-left" type="material-community" size={30} />
             </TouchableOpacity>
           ),
           title: 'New Room',

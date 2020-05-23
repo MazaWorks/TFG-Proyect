@@ -35,10 +35,9 @@ export function getDevicesExceptRoom(name) {
     .then(value => {
       var toret = [];
       if (value != null && value !== '') {
-        toret = JSON.parse(value);
-        for (let index = 0; index < toret.length; index++) {
-          if (toret[index].room === name) {
-            toret.splice(index, 1);
+        for (let device of JSON.parse(value)) {
+          if (device.room !== name) {
+            toret.push(device);
           }
         }
       }

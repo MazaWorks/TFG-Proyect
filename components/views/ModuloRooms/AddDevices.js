@@ -50,6 +50,7 @@ export default function MainView({navigation, route}) {
       });
     } else {
       navigation.setOptions({
+        title: 'Assign to ' + route.params.data.name,
         headerRight: () => null,
       });
     }

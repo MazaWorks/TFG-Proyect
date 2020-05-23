@@ -6,11 +6,9 @@ export default function TextHttpResponse({status}) {
     case -1:
       return (
         <View>
-          <Text style={style.topText}>Error al guardar la regla</Text>
-          <Text style={style.topText2}>El ESP ha creado la regla pero</Text>
-          <Text style={style.topText2}>
-            no se ha podido almacenar en tu dispositivo movil
-          </Text>
+          <Text style={style.topText}>Error interno de la aplicacion</Text>
+          <Text style={style.topText2}>Vuelva a intentar la acción</Text>
+          <Text style={style.topText2}>o comuníquese con el creador</Text>
         </View>
       );
     case 0:
@@ -29,14 +27,12 @@ export default function TextHttpResponse({status}) {
       return (
         <View>
           <Text style={style.topText}>La regla ha sido remplazada</Text>
-          <Text style={style.topText}>correctamente</Text>
         </View>
       );
     case 201:
       return (
         <View>
           <Text style={style.topText}>La regla ha sido creada</Text>
-          <Text style={style.topText}>correctamente</Text>
         </View>
       );
     case 400:

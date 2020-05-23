@@ -49,6 +49,7 @@ export default function RulesNavigation({navigation}) {
         name="RCH"
         component={ChooseClause}
         options={{
+          title: 'Devices',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
@@ -72,6 +73,7 @@ export default function RulesNavigation({navigation}) {
         name="RCD"
         component={ClauseByDevice}
         options={{
+          title: 'Conditions',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}

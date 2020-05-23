@@ -78,37 +78,65 @@ export default function MainView({navigation, route}) {
         )
           .then(response => {
             if (response.ok) {
+              route.params.rule.active = true;
               addItem('rules', rules, route.params.rule, route.params.index)
                 .then(value2 => {
                   route.params = null;
-                  getMapDevices().then(value3 => {
-                    setDevices(value3);
-                    setRules(value2);
-                    setModal({indicator: true, status: response.status});
-                    setLoading(false);
-                  });
+                  setModal({indicator: true, status: response.status});
+                  setLoading(false);
+                  setRules(value2);
                 })
                 .catch(() => {
                   setModal({indicator: true, status: -1});
                   setLoading(false);
                 });
             } else {
-              setModal({indicator: true, status: response.status});
-              setLoading(false);
+              if (longPress.data.active == null) {
+                route.params.rule.active = false;
+                addItem('rules', rules, route.params.rule, route.params.index)
+                  .then(value2 => {
+                    route.params = null;
+                    setRules(value2);
+                    setModal({indicator: true, status: response.status});
+                    setLoading(false);
+                  })
+                  .catch(() => {
+                    setModal({indicator: true, status: -1});
+                    setLoading(false);
+                  });
+              } else {
+                setModal({indicator: true, status: response.status});
+                setLoading(false);
+              }
             }
           })
           .catch(() => {
-            setModal({indicator: true, status: 0});
-            setLoading(false);
+            route.params.rule.active = false;
+            addItem('rules', rules, route.params.rule, route.params.index)
+              .then(value2 => {
+                route.params = null;
+                setRules(value2);
+                setModal({indicator: true, status: 0});
+                setLoading(false);
+              })
+              .catch(() => {
+                setModal({indicator: true, status: -1});
+                setLoading(false);
+              });
           });
       } else {
-        getAllData('rules').then(value => {
-          getMapDevices().then(value2 => {
-            setDevices(value2);
-            setRules(value);
+        getAllData('rules')
+          .then(value => {
+            getMapDevices().then(value2 => {
+              setDevices(value2);
+              setRules(value);
+              setLoading(false);
+            });
+          })
+          .catch(() => {
+            setModal({indicator: true, status: -1});
             setLoading(false);
           });
-        });
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,7 +188,9 @@ export default function MainView({navigation, route}) {
             backgroundColor:
               longPress.indicator && longPress.index === index
                 ? 'rgba(0,0,0,0.2)'
-                : 'white',
+                : data.active
+                ? '#85ed8c'
+                : '#e66e6e',
           },
         ]}
         onPress={() =>
@@ -187,7 +217,8 @@ export default function MainView({navigation, route}) {
               ]}
               resizeMode="contain"
             />
-            <View style={{width: (width * 0.8) / 5, marginLeft: width * 0.02}}>
+            <View
+              style={{width: (width * 0.8) / 4.5, marginLeft: width * 0.02}}>
               <Text style={listStyles.deviceName}>{deviceIf.name}</Text>
               <Text style={listStyles.deviceRoom}>
                 GPIO {data.if.device.gpio}
@@ -217,7 +248,7 @@ export default function MainView({navigation, route}) {
                 resizeMode="contain"
               />
               <View
-                style={{width: (width * 0.8) / 5, marginLeft: width * 0.02}}>
+                style={{width: (width * 0.8) / 4.5, marginLeft: width * 0.02}}>
                 <Text style={listStyles.deviceName}>{deviceThen.name}</Text>
                 <Text style={listStyles.deviceRoom}>
                   GPIO {data.then[0].device.gpio}
@@ -344,7 +375,6 @@ export default function MainView({navigation, route}) {
         }}
         data={rules}
         renderItem={({item, index}) => <Item data={item} index={index} />}
-        containerStyle={listStyles.mainContainer}
         keyExtractor={(item, index) => index.toString()}
         numColumns={1}
       />
@@ -357,6 +387,24 @@ export default function MainView({navigation, route}) {
       )}
       {longPress.indicator && (
         <View style={[optionsMenu.container, {height: height * 0.09}]}>
+          {!longPress.data.active && (
+            <TouchableOpacity
+              style={optionsMenu.iconsContainer}
+              onPress={() => {
+                doLongPress({
+                  indicator: false,
+                  data: {},
+                });
+                route.params = {
+                  rule: longPress.data,
+                  addIndicator: true,
+                  index: longPress.index,
+                };
+              }}>
+              <Icon name="edit" size={30} />
+              <Text style={optionsMenu.text}>Activate</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
             onPress={() => {
@@ -376,15 +424,19 @@ export default function MainView({navigation, route}) {
             style={optionsMenu.iconsContainer}
             onPress={() => {
               setLoading(true);
+              doLongPress({
+                indicator: false,
+                data: {},
+              });
               fetch(
                 'http://' +
-                  route.params.rule.if.ip +
+                  devices.get(longPress.data.if.device.deviceId).ip +
                   '/automatize?id=' +
-                  rules.if.id +
+                  longPress.data.if.id +
                   '&gpio=' +
-                  rules.if.gpio +
+                  longPress.data.if.device.gpio +
                   '&value=' +
-                  rules.if.value,
+                  longPress.data.if.value,
                 {
                   method: 'DELETE',
                 },
@@ -395,14 +447,16 @@ export default function MainView({navigation, route}) {
                       'rules',
                       Object.assign([], rules),
                       longPress.data,
-                    ).then(value => {
-                      setRules(value);
-                      doLongPress({
-                        indicator: false,
-                        data: {},
+                    )
+                      .then(value => {
+                        setRules(value);
+                        setModal({indicator: true, status: response.status});
+                        setLoading(false);
+                      })
+                      .catch(() => {
+                        setModal({indicator: true, status: -1});
+                        setLoading(false);
                       });
-                      setLoading(false);
-                    });
                   } else {
                     setModal({indicator: true, status: response.status});
                     setLoading(false);
@@ -484,7 +538,6 @@ const listStyles = StyleSheet.create({
     alignItems: 'center',
   },
   mainContainer: {
-    backgroundColor: '#fff',
     flexDirection: 'row',
     alignContent: 'center',
     alignItems: 'center',

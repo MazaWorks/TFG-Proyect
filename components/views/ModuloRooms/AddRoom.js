@@ -55,6 +55,7 @@ export default function TypeRoom({navigation, route}) {
         <Text style={styles.text}>Nombre: </Text>
         <TextInput
           style={styles.textInput}
+          maxLength={12}
           onChangeText={text => onChangeText(text)}
           value={roomName}
         />

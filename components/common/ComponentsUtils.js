@@ -76,7 +76,7 @@ export function imagesDevices(type) {
 export function nameDefaultDevices(type) {
   switch (type) {
     case 1:
-      return 'ESP8266';
+      return 'ESP8266-01';
   }
 }
 
@@ -85,7 +85,7 @@ export function devicesRules(types) {
   for (let i = 0; i < types.length; i++) {
     switch (types[i]) {
       case -1:
-        toret.push([{id: 0, keyboardType: 1, description: 'Wait ? minutes'}]);
+        toret.push([{id: 0, keyboardType: 1, description: 'Wait ? seconds'}]);
         break;
       case 0:
         toret.push([]);

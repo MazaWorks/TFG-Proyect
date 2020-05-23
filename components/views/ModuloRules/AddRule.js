@@ -34,16 +34,11 @@ export default function MainView({navigation, route}) {
       setMeasurer(replace.rule.if);
       setActuators(replace.rule.then);
       whereAreWe(false);
-      getMapDevices().then(value => {
-        setDevices(value);
-        setLoading(false);
-      });
-    } else {
-      getMapDevices().then(value => {
-        setDevices(value);
-        setLoading(false);
-      });
     }
+    getMapDevices().then(value => {
+      setDevices(value);
+      setLoading(false);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
