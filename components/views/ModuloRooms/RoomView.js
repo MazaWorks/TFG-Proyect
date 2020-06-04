@@ -93,7 +93,7 @@ export default function RoomView({navigation, route}) {
           />
         </View>
         <View style={notFoundStyles.textContainer}>
-          <Text style={notFoundStyles.text1}>No devices on this room</Text>
+          <Text style={notFoundStyles.text1}>No modules on this room</Text>
         </View>
       </View>
     );

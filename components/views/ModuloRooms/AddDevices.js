@@ -136,7 +136,7 @@ export default function MainView({navigation, route}) {
           />
           <View style={noDeviceStyles.header}>
             <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-              No Device Available
+              No Module Available
             </Text>
           </View>
         </View>
@@ -155,7 +155,7 @@ export default function MainView({navigation, route}) {
           },
         ]}>
         <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-          Choose the devices to move to
+          Choose the modules to move to
         </Text>
         <Text style={{fontSize: 15, fontWeight: 'bold'}}>
           {route.params.data.name}

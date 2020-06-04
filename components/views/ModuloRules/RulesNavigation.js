@@ -49,7 +49,7 @@ export default function RulesNavigation({navigation}) {
         name="RCH"
         component={ChooseClause}
         options={{
-          title: 'Devices',
+          title: 'Modules',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}

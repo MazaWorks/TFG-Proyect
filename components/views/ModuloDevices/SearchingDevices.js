@@ -1,37 +1,100 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useLayoutEffect} from 'react';
-import {View, StyleSheet, Text, TouchableOpacity, Image} from 'react-native';
+import React, {useState, useLayoutEffect, useEffect} from 'react';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  Platform,
+} from 'react-native';
 import {Icon} from 'react-native-elements';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
-import {CircleSnail} from 'react-native-progress';
 import {useDimensions} from '@react-native-community/hooks';
 import {imagesDevices} from '../../common/ComponentsUtils';
 import {nameDefaultDevices} from '../../common/ComponentsUtils';
 import dgram from 'dgram';
+import {NetworkInfo} from 'react-native-network-info';
 
 export default function SearchingDevices({navigation}) {
-  const [isLoading, setLoading] = useState(true);
-  const [devices, setDevices] = useState([]);
-  var [abort] = useState(false);
+  const [devices, setDevices] = useState(new Set());
   const {width, height} = useDimensions().window;
-
-  function toByteArray(obj) {
+  const toByteArray = obj => {
     var uint = new Uint8Array(obj.length);
     for (var i = 0, l = obj.length; i < l; i++) {
       uint[i] = obj.charCodeAt(i);
     }
     return new Uint8Array(uint);
-  }
+  };
+
+  useEffect(() => {
+    var newSocket = dgram.createSocket('udp4');
+    var msg = toByteArray('?');
+    newSocket.bind();
+    var intervalo = 0;
+
+    NetworkInfo.getIPV4Address().then(ipv4Address => {
+      NetworkInfo.getSubnet().then(subnet => {
+        var subnetArray = subnet.split('.');
+        var IPArray = ipv4Address.split('.');
+        for (let i = 0; i < 4; i++) {
+          if (subnetArray[i] === '0') {
+            while (i < 4) {
+              IPArray[i] = '255';
+              i++;
+            }
+            break;
+          }
+        }
+
+        newSocket.once('listening', function() {
+          newSocket.send(msg, 0, msg.length, 8080, IPArray.join('.'));
+        });
+
+        newSocket.on('message', function(data, rinfo) {
+          var json = JSON.parse(
+            String.fromCharCode.apply(null, new Uint8Array(data)),
+          );
+          setDevices(
+            devices =>
+              new Set([
+                ...devices.add(
+                  JSON.stringify({
+                    ...json,
+                    ip: rinfo.address,
+                    name: nameDefaultDevices(json.type),
+                  }),
+                ),
+              ]),
+          );
+        });
+
+        intervalo = setInterval(() => {
+          newSocket.send(msg, 0, msg.length, 8080, IPArray.join('.'));
+        }, 10000);
+      });
+    });
+
+    return () => {
+      clearInterval(intervalo);
+      newSocket.close();
+    };
+  }, []);
 
   useLayoutEffect(() => {
-    if (devices.length !== 0) {
+    if (devices.size !== 0) {
       navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
             style={styles.iconHeaderContainer}
             onPress={() => {
+              var devicesSent = [];
+              for (let device of devices) {
+                devicesSent.push(JSON.parse(device));
+              }
               navigation.navigate('DM', {
-                newDevices: devices,
+                newDevices: devicesSent,
                 addIndicator: true,
               });
             }}>
@@ -46,8 +109,6 @@ export default function SearchingDevices({navigation}) {
         <TouchableOpacity
           style={styles.iconHeaderContainer}
           onPress={() => {
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            abort = true;
             navigation.navigate('DM');
           }}>
           <Icon name="arrow-left" type="material-community" />
@@ -57,7 +118,8 @@ export default function SearchingDevices({navigation}) {
   }, [devices, navigation]);
 
   const renderItem = ({item}) => {
-    var srcImage = imagesDevices(item.type);
+    var itemJson = JSON.parse(item);
+    var srcImage = imagesDevices(itemJson.type);
     return (
       <TouchableOpacity>
         <View
@@ -75,73 +137,31 @@ export default function SearchingDevices({navigation}) {
             }}
             resizeMode="contain"
           />
-          <Text style={styles.textStyle}>{item.ip}</Text>
+          <Text style={styles.textStyle}>{itemJson.ip}</Text>
         </View>
       </TouchableOpacity>
     );
   };
 
-  if (isLoading) {
-    var devicesFound = new Set();
-    var socket = dgram.createSocket('udp4');
-    socket.bind();
-
-    socket.once('listening', function() {
-      var msg = toByteArray('?');
-      socket.send(msg, 0, msg.length, 8080, '192.168.0.255');
-      socket.send(msg, 0, msg.length, 8080, '192.168.0.255');
-    });
-
-    socket.on('message', function(data, rinfo) {
-      if (!abort) {
-        var json = JSON.parse(
-          String.fromCharCode.apply(null, new Uint8Array(data)),
-        );
-        devicesFound.add(
-          JSON.stringify({
-            ...json,
-            ip: rinfo.address,
-            name: nameDefaultDevices(json.type),
-          }),
-        );
-      }
-    });
-
-    const interval = setInterval(() => {
-      socket.close();
-      clearInterval(interval);
-      if (!abort) {
-        var devices = [];
-        for (let device of devicesFound) {
-          devices.push(JSON.parse(device));
-        }
-        setLoading(false);
-        setDevices(devices);
-      }
-    }, 10000);
-
+  if (devices.size === 0) {
     return (
       <View style={styles.container}>
-        <CircleSnail
-          size={100}
-          duration={5000}
-          spinDuration={1000}
-          strokeCap={'round'}
+        <ActivityIndicator
+          size={Platform.OS === 'ios' ? 'large' : 100}
+          color="#0000ff"
         />
-      </View>
-    );
-  }
-
-  if (devices.length === 0) {
-    return (
-      <View style={styles.container}>
-        <Text style={[notFoundStyles.text1, {marginBottom: height * 0.05}]}>
-          No devices found
+        <Text
+          style={[
+            notFoundStyles.text1,
+            {marginTop: height * 0.03, marginBottom: height * 0.03},
+          ]}>
+          Searching ...
         </Text>
         <Text style={notFoundStyles.text2}>Make sure you are connected </Text>
         <Text style={notFoundStyles.text2}>
-          to the same network as the devices
+          to the same network as the modules
         </Text>
+        <Text style={notFoundStyles.text2}>and they are online and active</Text>
       </View>
     );
   }
@@ -160,7 +180,7 @@ export default function SearchingDevices({navigation}) {
       </View>
       <OptimizedFlatList
         style={styles.flatList}
-        data={devices}
+        data={Array.from(devices)}
         renderItem={renderItem}
         contentContainerStyle={styles.flatList}
         keyExtractor={(item, index) => index.toString()}

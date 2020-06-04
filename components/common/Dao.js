@@ -9,8 +9,8 @@ export function getAllData(item) {
       }
       return toret;
     })
-    .catch(error => {
-      console.log('Error: ' + error.message);
+    .catch(() => {
+      return [];
     });
 }
 
@@ -25,8 +25,8 @@ export async function getMapDevices() {
       }
       return toret;
     })
-    .catch(error => {
-      console.log('Error: ' + error.message);
+    .catch(() => {
+      return new Map();
     });
 }
 
@@ -43,8 +43,8 @@ export function getDevicesExceptRoom(name) {
       }
       return toret;
     })
-    .catch(error => {
-      console.log('Error: ' + error.message);
+    .catch(() => {
+      return [];
     });
 }
 
@@ -62,8 +62,8 @@ export function getDevicesbyRoom(roomName) {
       }
       return toret;
     })
-    .catch(error => {
-      console.log('Error: ' + error.message);
+    .catch(() => {
+      return [];
     });
 }
 
@@ -87,10 +87,11 @@ export async function renameItem(name, array, item, newName) {
       }
       return array;
     })
-    .catch(error => {
-      console.log('Error: ' + error.message);
+    .catch(() => {
+      return array;
     });
 }
+
 export async function addDeviceToRoom(room, items) {
   var añade = false;
   var mapNumberDevices = new Map();
@@ -121,9 +122,7 @@ export async function addDeviceToRoom(room, items) {
       }
       AsyncStorage.setItem('rooms', JSON.stringify(value));
     });
-    AsyncStorage.setItem('devices', JSON.stringify(devices)).catch(error => {
-      console.log('Error: ' + error.message);
-    });
+    AsyncStorage.setItem('devices', JSON.stringify(devices));
   }
 }
 
@@ -179,8 +178,8 @@ export async function addItem(name, array, item, index) {
       .then(() => {
         return newValue;
       })
-      .catch(error => {
-        console.log('Error: ' + error.message);
+      .catch(() => {
+        return newValue;
       });
   } else {
     return newValue;
@@ -197,8 +196,8 @@ export async function deleteItem(name, array, item) {
         .then(() => {
           return array;
         })
-        .catch(error => {
-          console.log('Error: ' + error.message);
+        .catch(() => {
+          return array;
         });
     } else if (name === 'rooms') {
       var devices = await getAllData('devices');
@@ -217,8 +216,8 @@ export async function deleteItem(name, array, item) {
           }
           return array;
         })
-        .catch(error => {
-          console.log('Error: ' + error.message);
+        .catch(() => {
+          return array;
         });
     } else if (name === 'devices') {
       var rooms = await getAllData('rooms');
@@ -237,11 +236,26 @@ export async function deleteItem(name, array, item) {
           }
           return array;
         })
-        .catch(error => {
-          console.log('Error: ' + error.message);
+        .catch(() => {
+          return array;
         });
     }
   } else {
     return array;
   }
+}
+
+export async function existRuleOnDevice(item) {
+  var rules = await getAllData('rules');
+  for (const rule of rules) {
+    if (rule.if.device.deviceId === item.id) {
+      return true;
+    }
+    for (const action of rule.then) {
+      if (action.device.deviceId === item.id) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

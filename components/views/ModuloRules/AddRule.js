@@ -98,7 +98,10 @@ export default function MainView({navigation, route}) {
           (replace == null ||
             (replace != null &&
               JSON.stringify({if: measurer, then: actuators}) !==
-                JSON.stringify(replace.rule)));
+                JSON.stringify({
+                  if: replace.rule.if,
+                  then: replace.rule.then,
+                })));
         if (toAdd) {
           return (
             <TouchableOpacity

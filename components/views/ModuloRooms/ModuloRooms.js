@@ -88,7 +88,7 @@ export default function MainView({navigation, route}) {
           roundAvatar
           title={data.name}
           titleStyle={listStyles.roomName}
-          subtitle={`Number of Devices ${data.numberDevices}`}
+          subtitle={`Number of Modules ${data.numberDevices}`}
           subtitleStyle={listStyles.numberDevices}
           leftElement={
             <View style={listStyles.iconRoom}>
@@ -211,7 +211,7 @@ export default function MainView({navigation, route}) {
               });
             }}>
             <Icon name="devices" size={30} />
-            <Text style={optionsMenu.text}>Add Device</Text>
+            <Text style={optionsMenu.text}>Add Module</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={optionsMenu.iconsContainer}

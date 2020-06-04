@@ -15,7 +15,7 @@ export default function DevicesNavigation({navigation}) {
         name="DM"
         component={MainView}
         options={{
-          title: 'Devices',
+          title: 'Modules',
           headerStyle: {
             backgroundColor: '#1e5885',
           },
@@ -32,7 +32,7 @@ export default function DevicesNavigation({navigation}) {
         name="DV"
         component={DeviceView}
         options={{
-          title: 'DeviceView',
+          title: 'ModulesView',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}

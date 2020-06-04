@@ -33,7 +33,7 @@ export default function MainNavigation() {
         name="Devices"
         component={DevicesNavigation}
         options={{
-          title: 'Devices',
+          title: 'Modules',
           drawerIcon: ({color}) => <Icon name="cast" color={color} />,
         }}
       />
@@ -60,11 +60,10 @@ function CustomDrawerContent(props) {
     <DrawerContentScrollView {...props}>
       <View style={styles.drawerHeader}>
         <Image
-          source={require('../assets/no_user.png')}
+          source={require('../assets/drawerIcon.png')}
           style={styles.profileImg}
         />
-        <Text style={styles.nameApp}>StayHome</Text>
-        <Text style={styles.username}>Default User</Text>
+        <Text style={styles.nameApp}>Stay Home Domótica</Text>
       </View>
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
@@ -84,6 +83,10 @@ const styles = StyleSheet.create({
   drawerHeader: {
     alignItems: 'center',
   },
-  nameApp: {fontWeight: 'bold', fontSize: 16, marginTop: 10},
-  username: {color: 'gray', marginBottom: 10},
+  nameApp: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginTop: 10,
+    marginBottom: 10,
+  },
 });

@@ -119,10 +119,10 @@ export default function DeviceView({navigation, device}) {
           {errorRequest.error}
         </Text>
         <Text style={errorStyles.text2}>
-          Make sure the device is online and active
+          Make sure the Module is online and active
         </Text>
         <Text style={errorStyles.text2}>You have to be connected </Text>
-        <Text style={errorStyles.text2}>to the same network as the device</Text>
+        <Text style={errorStyles.text2}>to the same network as the Module</Text>
       </View>
     );
   }
@@ -152,7 +152,7 @@ export default function DeviceView({navigation, device}) {
               />
             </TouchableOpacity>
           );
-        } else {
+        } else if (device.devices[key] === 1) {
           return (
             <View key={key} style={styles.tempHumContainer}>
               <Text style={styles.name}>GPIO {key}</Text>

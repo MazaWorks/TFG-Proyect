@@ -11,7 +11,7 @@ import {
   Modal,
 } from 'react-native';
 import {Icon, Button} from 'react-native-elements';
-import TextHttpResponse from './TextHttpResponse/TextHttpResponse';
+import TextHttpResponse from '../../common/modalText/TextHttpResponse';
 import {useDimensions} from '@react-native-community/hooks';
 import {useIsFocused} from '@react-navigation/native';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
@@ -321,7 +321,7 @@ export default function MainView({navigation, route}) {
             containerStyle={noDeviceStyles.button}
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
-            title="Find Devices"
+            title="Find Modules"
             onPress={() => navigation.navigate('RA')}
           />
         </View>
@@ -513,9 +513,6 @@ const modalStyle = StyleSheet.create({
     borderRadius: 20,
   },
   modalOptionsContainer: {
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderColor: 'grey',
     flexDirection: 'row',
   },
   modalOptionDelete: {

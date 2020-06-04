@@ -147,7 +147,7 @@ export default function MainView({navigation, route}) {
                 marginLeft: '10%',
                 fontSize: 10,
               }}>
-              Conditions by Devices
+              Conditions by Modules
             </Text>
           </View>
         }

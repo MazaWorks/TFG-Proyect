@@ -16,12 +16,20 @@ import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {useDimensions} from '@react-native-community/hooks';
 import {useIsFocused} from '@react-navigation/native';
 import {imagesDevices} from '../../common/ComponentsUtils';
-import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
+import ErrorResponse from '../../common/modalText/ErrorResponse';
+import {
+  getAllData,
+  addItem,
+  deleteItem,
+  renameItem,
+  existRuleOnDevice,
+} from '../../common/Dao';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, getDevices] = useState([]);
   const [rename, setRename] = useState({indicator: false});
+  const [modalError, setModalError] = useState({indicator: false});
   const [longPress, doLongPress] = useState({
     indicator: false,
     data: {},
@@ -171,7 +179,7 @@ export default function MainView({navigation, route}) {
             containerStyle={noDeviceStyles.button}
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
-            title="Find Devices"
+            title="Find Modules"
             onPress={() => navigation.navigate('DS')}
           />
         </View>
@@ -189,7 +197,7 @@ export default function MainView({navigation, route}) {
             marginBottom: height * 0.05,
           },
         ]}>
-        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Device</Text>
+        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Module</Text>
       </View>
       <OptimizedFlatList
         style={{
@@ -223,9 +231,15 @@ export default function MainView({navigation, route}) {
             style={optionsMenu.iconsContainer}
             onPress={() => {
               setLoading(true);
-              var array = Object.assign([], devices);
-              deleteItem('devices', array, longPress.data).then(value => {
-                getDevices(value);
+              existRuleOnDevice(longPress.data).then(response => {
+                if (!response) {
+                  var array = Object.assign([], devices);
+                  deleteItem('devices', array, longPress.data).then(value => {
+                    getDevices(value);
+                  });
+                } else {
+                  setModalError({indicator: true, error: 1});
+                }
                 doLongPress({
                   indicator: false,
                   data: {},
@@ -310,6 +324,34 @@ export default function MainView({navigation, route}) {
                   ]}>
                   Rename
                 </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalError.indicator}>
+        <View style={modalStyle.modalContainer}>
+          <View
+            style={[
+              modalStyle.modelComponentsContainer,
+              {
+                marginBottom: height * 0.05,
+                width: width * 0.9,
+              },
+            ]}>
+            <ErrorResponse error={modalError.error} />
+            <View style={modalStyle.modalOptionsContainer}>
+              <TouchableOpacity
+                style={modalStyle.modalOptionDelete}
+                onPress={() => {
+                  setModalError({
+                    indicator: false,
+                  });
+                }}>
+                <Text style={modalStyle.textStyle}>Accept</Text>
               </TouchableOpacity>
             </View>
           </View>
