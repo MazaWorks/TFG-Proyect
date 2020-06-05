@@ -131,31 +131,20 @@ export default function MainView({navigation, route}) {
       <View style={styles.container}>
         <View
           style={[
-            styles.listHeader,
-            {
-              marginTop: height * 0.1,
-              marginBottom: height * 0.05,
-            },
-          ]}>
-          <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Room</Text>
-        </View>
-        <View
-          style={[
             styles.noDeviceContainer,
             {
               padding: width * 0.1,
-              paddingTop: width * 0.05,
-              paddingBottom: width * 0.05,
+              paddingBottom: height * 0.05,
             },
           ]}>
           <Image
             source={require('../../../assets/Rooms/noRooms.png')}
             style={{
-              width: width * 0.6,
-              height: width * 0.36,
+              width: width,
+              height: width * 0.5,
               borderColor: 'transparent',
               alignSelf: 'center',
-              opacity: 0.3,
+              opacity: 0.5,
             }}
             resizeMode="contain"
           />
@@ -417,12 +406,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e4ffff',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   listHeader: {
     alignItems: 'center',
   },
   noDeviceContainer: {
-    backgroundColor: '#fff',
     alignItems: 'center',
   },
   noRoomButton: {

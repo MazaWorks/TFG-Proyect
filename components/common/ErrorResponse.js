@@ -1,7 +1,7 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
-export default function TextHttpResponse({status}) {
+export default function ErrorResponse({status}) {
   switch (status) {
     case -1:
       return (
@@ -17,6 +17,24 @@ export default function TextHttpResponse({status}) {
           <Text style={style.topText}>ESP8266 NOT FOUND</Text>
           <Text style={style.topText2}>Make sure the ESP8266 is active</Text>
           <Text style={style.topText2}>and you are on the same network</Text>
+        </View>
+      );
+    case 1:
+      return (
+        <View style={style.container}>
+          <Text style={style.topText}>DELETE NOT ALLOWED</Text>
+          <Text style={style.topText2}>A rule exist on this ESP</Text>
+          <Text style={style.topText2}>
+            delete all the rules on this module
+          </Text>
+        </View>
+      );
+    case 2:
+      return (
+        <View style={style.container}>
+          <Text style={style.topText}>FUNCTION NOT ALLOWED</Text>
+          <Text style={style.topText2}>There is no module registered</Text>
+          <Text style={style.topText2}>Register some module first</Text>
         </View>
       );
     case 200:

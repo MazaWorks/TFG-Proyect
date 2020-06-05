@@ -16,7 +16,7 @@ import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {useDimensions} from '@react-native-community/hooks';
 import {useIsFocused} from '@react-navigation/native';
 import {imagesDevices} from '../../common/ComponentsUtils';
-import ErrorResponse from '../../common/modalText/ErrorResponse';
+import ErrorResponse from '../../common/ErrorResponse';
 import {
   getAllData,
   addItem,
@@ -147,25 +147,13 @@ export default function MainView({navigation, route}) {
       <View style={noDeviceStyles.container}>
         <View
           style={[
-            noDeviceStyles.header,
-            {
-              marginTop: height * 0.1,
-              marginBottom: height * 0.05,
-            },
-          ]}>
-          <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Room</Text>
-        </View>
-        <View
-          style={[
             noDeviceStyles.mainContainer,
             {
-              padding: '10%',
-              paddingTop: '5%',
-              paddingBottom: '5%',
+              padding: height * 0.1,
             },
           ]}>
           <Image
-            source={require('../../../assets/Devices/noDevices.png')}
+            source={require('../../../assets/Devices/noModules.png')}
             style={[
               noDeviceStyles.image,
               {
@@ -238,7 +226,7 @@ export default function MainView({navigation, route}) {
                     getDevices(value);
                   });
                 } else {
-                  setModalError({indicator: true, error: 1});
+                  setModalError({indicator: true, status: 1});
                 }
                 doLongPress({
                   indicator: false,
@@ -342,7 +330,7 @@ export default function MainView({navigation, route}) {
                 width: width * 0.9,
               },
             ]}>
-            <ErrorResponse error={modalError.error} />
+            <ErrorResponse status={modalError.status} />
             <View style={modalStyle.modalOptionsContainer}>
               <TouchableOpacity
                 style={modalStyle.modalOptionDelete}
@@ -351,7 +339,7 @@ export default function MainView({navigation, route}) {
                     indicator: false,
                   });
                 }}>
-                <Text style={modalStyle.textStyle}>Accept</Text>
+                <Text style={modalStyle.textStyle}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -417,12 +405,12 @@ const noDeviceStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e4ffff',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
   },
   mainContainer: {
-    backgroundColor: '#fff',
     alignItems: 'center',
   },
   image: {

@@ -304,14 +304,11 @@ export default function MainView({navigation, route}) {
           style={[
             noDeviceStyles.mainContainer,
             {
-              padding: '10%',
-              paddingTop: '5%',
               paddingBottom: '5%',
-              marginTop: height * 0.15,
             },
           ]}>
           <Image
-            source={require('../../../assets/Devices/noDevices.png')}
+            source={require('../../../assets/Devices/noModules.png')}
             style={[
               noDeviceStyles.image,
               {
@@ -484,9 +481,9 @@ const noDeviceStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e4ffff',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   mainContainer: {
-    backgroundColor: '#fff',
     alignItems: 'center',
   },
   image: {

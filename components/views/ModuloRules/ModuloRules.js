@@ -11,7 +11,7 @@ import {
   Modal,
 } from 'react-native';
 import {Icon, Button} from 'react-native-elements';
-import TextHttpResponse from '../../common/modalText/TextHttpResponse';
+import ErrorResponse from '../../common/ErrorResponse';
 import {useDimensions} from '@react-native-community/hooks';
 import {useIsFocused} from '@react-navigation/native';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
@@ -289,25 +289,13 @@ export default function MainView({navigation, route}) {
       <View style={noDeviceStyles.container}>
         <View
           style={[
-            noDeviceStyles.header,
-            {
-              marginTop: height * 0.1,
-              marginBottom: height * 0.05,
-            },
-          ]}>
-          <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Rule</Text>
-        </View>
-        <View
-          style={[
             noDeviceStyles.mainContainer,
             {
               padding: '10%',
-              paddingTop: '5%',
-              paddingBottom: '5%',
             },
           ]}>
           <Image
-            source={require('../../../assets/Devices/noDevices.png')}
+            source={require('../../../assets/Devices/noModules.png')}
             style={[
               noDeviceStyles.image,
               {
@@ -321,8 +309,14 @@ export default function MainView({navigation, route}) {
             containerStyle={noDeviceStyles.button}
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
-            title="Find Modules"
-            onPress={() => navigation.navigate('RA')}
+            title="Create Rule"
+            onPress={() => {
+              if (devices.size) {
+                navigation.navigate('RA');
+              } else {
+                setModal({indicator: true, status: 2});
+              }
+            }}
           />
         </View>
         <Modal
@@ -338,7 +332,7 @@ export default function MainView({navigation, route}) {
                   width: width * 0.9,
                 },
               ]}>
-              <TextHttpResponse status={modal.status} />
+              <ErrorResponse status={modal.status} />
               <View style={modalStyle.modalOptionsContainer}>
                 <TouchableOpacity
                   style={modalStyle.modalOptionDelete}
@@ -347,7 +341,7 @@ export default function MainView({navigation, route}) {
                       indicator: false,
                     });
                   }}>
-                  <Text style={modalStyle.textStyle}>Accept</Text>
+                  <Text style={modalStyle.textStyle}>Cancel</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -381,30 +375,34 @@ export default function MainView({navigation, route}) {
       {!longPress.indicator && (
         <TouchableOpacity
           style={listStyles.addRoom}
-          onPress={() => navigation.navigate('RA')}>
+          onPress={() => {
+            if (devices.size) {
+              navigation.navigate('RA');
+            } else {
+              setModal({indicator: true, status: 2});
+            }
+          }}>
           <Icon name="add" type="material" color="#125c28" size={40} />
         </TouchableOpacity>
       )}
       {longPress.indicator && (
         <View style={[optionsMenu.container, {height: height * 0.09}]}>
-          {!longPress.data.active && (
-            <TouchableOpacity
-              style={optionsMenu.iconsContainer}
-              onPress={() => {
-                doLongPress({
-                  indicator: false,
-                  data: {},
-                });
-                route.params = {
-                  rule: longPress.data,
-                  addIndicator: true,
-                  index: longPress.index,
-                };
-              }}>
-              <Icon name="edit" size={30} />
-              <Text style={optionsMenu.text}>Activate</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            style={optionsMenu.iconsContainer}
+            onPress={() => {
+              doLongPress({
+                indicator: false,
+                data: {},
+              });
+              route.params = {
+                rule: longPress.data,
+                addIndicator: true,
+                index: longPress.index,
+              };
+            }}>
+            <Icon name="edit" size={30} />
+            <Text style={optionsMenu.text}>Activate</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
             onPress={() => {
@@ -425,8 +423,8 @@ export default function MainView({navigation, route}) {
             onPress={() => {
               setLoading(true);
               doLongPress({
+                ...longPress,
                 indicator: false,
-                data: {},
               });
               fetch(
                 'http://' +
@@ -458,12 +456,16 @@ export default function MainView({navigation, route}) {
                         setLoading(false);
                       });
                   } else {
-                    setModal({indicator: true, status: response.status});
+                    setModal({
+                      indicator: true,
+                      forceDelete: true,
+                      status: response.status,
+                    });
                     setLoading(false);
                   }
                 })
                 .catch(() => {
-                  setModal({indicator: true, status: 0});
+                  setModal({indicator: true, forceDelete: true, status: 0});
                   setLoading(false);
                 });
             }}>
@@ -482,7 +484,7 @@ export default function MainView({navigation, route}) {
                 width: width * 0.9,
               },
             ]}>
-            <TextHttpResponse status={modal.status} />
+            <ErrorResponse status={modal.status} />
             <View style={modalStyle.modalOptionsContainer}>
               <TouchableOpacity
                 style={modalStyle.modalOptionDelete}
@@ -491,8 +493,38 @@ export default function MainView({navigation, route}) {
                     indicator: false,
                   });
                 }}>
-                <Text style={modalStyle.textStyle}>Accept</Text>
+                <Text style={modalStyle.textStyle}>Cancel</Text>
               </TouchableOpacity>
+              {modal.forceDelete && (
+                <TouchableOpacity
+                  style={modalStyle.modalOptionDelete}
+                  onPress={() => {
+                    deleteItem(
+                      'rules',
+                      Object.assign([], rules),
+                      longPress.data,
+                    )
+                      .then(value => {
+                        setModal({indicator: false});
+                        doLongPress({
+                          indicator: false,
+                          data: {},
+                        });
+                        setRules(value);
+                        setLoading(false);
+                      })
+                      .catch(() => {
+                        setModal({indicator: false});
+                        doLongPress({
+                          indicator: false,
+                          data: {},
+                        });
+                        setLoading(false);
+                      });
+                  }}>
+                  <Text style={modalStyle.textStyle}>Force Delete</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
@@ -592,12 +624,12 @@ const noDeviceStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#e4ffff',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
   },
   mainContainer: {
-    backgroundColor: '#fff',
     alignItems: 'center',
   },
   image: {

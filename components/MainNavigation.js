@@ -34,7 +34,7 @@ export default function MainNavigation() {
         component={DevicesNavigation}
         options={{
           title: 'Modules',
-          drawerIcon: ({color}) => <Icon name="cast" color={color} />,
+          drawerIcon: ({color}) => <Icon name="devices" color={color} />,
         }}
       />
       <Drawer.Screen
