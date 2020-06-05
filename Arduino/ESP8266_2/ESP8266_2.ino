@@ -4,36 +4,45 @@
 #include <ESPAsyncWiFiManager.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-#include <Adafruit_Sensor.h>
-#include <DHT.h>
+
+//Descomentar en caso de sensores
+//#include <Adafruit_Sensor.h>
+//#include <DHT.h>
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
 #include <WiFiUdp.h>
 
-#define APSSID "ESP8266-1"
+#define APSSID "ESP8266-2"
 #define APPASS "mypass"
-#define GPIODHT 0
 // Automatize
 #define NUMREGLAS 10
 #define MAXACCIONES 10
 #define IPSIZE 50
 
+//Descomentar en caso de sensores
+//#define GPIODHT 0
+
 AsyncWebServer server(80);
 DNSServer dns;
-DHT dht(GPIODHT, DHT22);
 WiFiUDP Udp;
+
+//Descomentar en caso de sensores
+//DHT dht(GPIODHT, DHT22);
 byte i;
 byte i2;
-float temperatura = 0.0;
+
+//Descomentar en caso de sensores
+/*float temperatura = 0.0;
 float newT = 0.0;
 float humedad = 0.0;
 float newH = 0.0;
-unsigned long currentMillis;
 unsigned long previousMillis = 0;
-const long interval = 60000;
-const byte tiposGpio[4] = {1,2,2,2};
+const long interval = 60000;*/
+unsigned long currentMillis;
+
+const byte tiposGpio[4] = {2,2,2,2};
 // Change "id", "type 1" => ESP8266, "devices" most be types of GPIO
-const char respuestaUDP[50] = "{\"id\": 1,\"type\": 1,\"devices\": [1,2,2,2]}";
+const char respuestaUDP[50] = "{\"id\": 2,\"type\": 1,\"devices\": [2,2,2,2]}";
 char packetBuffer[UDP_TX_PACKET_MAX_SIZE + 1];
 
 // Automatize variables
@@ -65,9 +74,9 @@ byte ruleToExecute = 0;
 // RequestBody recibido
 String body;
 
-// On DHT22, replace a %V#% by : {"Temperature": %TEMPERATURE%, "Humidity": %HUMIDITY%}
+// En caso de sensores, reemplazar los %V#% por : {"Temperature": %TEMPERATURE%, "Humidity": %HUMIDITY%}
 const char readResponse[] PROGMEM = R"rawliteral(
-{"Values": [{"Temperature": %TEMPERATURE%, "Humidity": %HUMIDITY%}, %V1%, %V2%, %V3%]} )rawliteral";
+{"Values": [%V0%, %V1%, %V2%, %V3%]} )rawliteral";
   
 // Replaces placeholder with values
 String processor(const String& var) {
@@ -79,11 +88,15 @@ String processor(const String& var) {
     return String(digitalRead(2), DEC);
   } else if(var == "V3"){
     return String(digitalRead(3), DEC);
-  } else if (var == "TEMPERATURE"){
+  }
+  
+  //Descomentar en caso de sensores
+  /*else if (var == "TEMPERATURE"){
     return String(temperatura);
   } else if (var == "HUMIDITY"){
     return String(humedad);
-  } else {
+  } */
+  else {
     return String("0");
   }
 }
@@ -177,6 +190,8 @@ void automatize(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_
   }
 }
 
+//Descomentar en caso de sensores
+/*
 void activateRuleType1(float temperatura, float humedad) {
   for (i2 = 0; i2 < NUMREGLAS; i2++) {
     if(!condicionActiva[i2] && condicionTipoGpio[i2] == 1) {
@@ -199,7 +214,7 @@ void activateRuleType1(float temperatura, float humedad) {
       }
     }
   }
-}
+}*/
 
 void activateRuleType2(int gpio, boolean on) {
   for (i2 = 0; i2 < NUMREGLAS; i2++) {
@@ -213,12 +228,13 @@ void setup() {
   //Serial.begin(9600);
   
   // Pins set as output
-  //pinMode(0, OUTPUT);
+  pinMode(0, OUTPUT);
   pinMode(1, OUTPUT);
   pinMode(2, OUTPUT);
   pinMode(3, OUTPUT);
   
-  dht.begin();
+//Descomentar en caso de sensores
+  //dht.begin();
 
   AsyncWiFiManager wifiManager(&server, &dns);
   if (!wifiManager.autoConnect(APSSID, APPASS)) {
@@ -300,6 +316,8 @@ void setup() {
   Udp.begin(8080);
   server.begin();
   
+  //Descomentar en caso de sensores
+  /*
   newT = dht.readTemperature();
   newH = dht.readHumidity();
   if (!(isnan(newT) || isnan(newH)))
@@ -307,7 +325,7 @@ void setup() {
     temperatura = newT;
     humedad = newH;
     activateRuleType1(temperatura,humedad);
-  }
+  }*/
 }
 
 void loop() {
@@ -337,7 +355,8 @@ void loop() {
   
   for (i = 0; i < NUMREGLAS; i++) {
     if(condicionActiva[i]) {
-      if(condicionTipoGpio[i] == 1) {
+      //Descomentar en caso de sensores
+      /*if(condicionTipoGpio[i] == 1) {
         if(condicionID[i] == 0) {
           if(temperatura > condicionValor[i]) {
             ruleToExecute = i + 1;
@@ -359,7 +378,8 @@ void loop() {
             break;
           }
         }
-      } else if(condicionTipoGpio[i] == 2) {
+      } else*/ 
+      if(condicionTipoGpio[i] == 2) {
         if(condicionID[i] == 0) {
           if(!digitalRead(condicionGpio[i])) {
             ruleToExecute = i + 1;
@@ -405,6 +425,8 @@ void loop() {
     ruleToExecute = 0;
   }
 
+  //Descomentar en caso de sensores
+/*
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     newT = dht.readTemperature();
@@ -414,5 +436,5 @@ void loop() {
       humedad = newH;
       activateRuleType1(temperatura,humedad);
     }
-  }
+  }*/
 }
