@@ -118,11 +118,9 @@ export default function DeviceView({navigation, device}) {
         <Text style={[errorStyles.text1, {marginBottom: height * 0.05}]}>
           {errorRequest.error}
         </Text>
-        <Text style={errorStyles.text2}>
-          Make sure the Module is online and active
-        </Text>
-        <Text style={errorStyles.text2}>You have to be connected </Text>
-        <Text style={errorStyles.text2}>to the same network as the Module</Text>
+        <Text style={errorStyles.text2}>Asegúrate de estar conectado</Text>
+        <Text style={errorStyles.text2}>a la misma red que los módulos</Text>
+        <Text style={errorStyles.text2}>y que estén online y activos</Text>
       </View>
     );
   }
@@ -165,7 +163,7 @@ export default function DeviceView({navigation, device}) {
                       height: width * 0.3,
                     },
                   ]}>
-                  <Text style={styles.name}>Temperature</Text>
+                  <Text style={styles.name}>Temperatura</Text>
                   <Text style={styles.name}>{act.Temperature}ºC</Text>
                 </View>
 
@@ -177,7 +175,7 @@ export default function DeviceView({navigation, device}) {
                       height: width * 0.3,
                     },
                   ]}>
-                  <Text style={styles.name}>Humidity</Text>
+                  <Text style={styles.name}>Humedad</Text>
                   <Text style={styles.name}>{act.Humidity}%</Text>
                 </View>
               </View>

@@ -56,7 +56,7 @@ export default function MainView({navigation, route}) {
         <View style={{width: (width * 0.8 * 4) / 6}}>
           <Text style={listStyles.name}>{data.name}</Text>
           <Text style={listStyles.subtitle}>
-            {data.room != null ? data.room : 'Not Assigned'}
+            {data.room != null ? data.room : 'No Asignado'}
           </Text>
         </View>
       </TouchableOpacity>
@@ -85,7 +85,7 @@ export default function MainView({navigation, route}) {
           },
         ]}>
         <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-          Select a condition
+          Selecciona una condición
         </Text>
       </View>
       <Text
@@ -100,7 +100,7 @@ export default function MainView({navigation, route}) {
                 marginLeft: '10%',
                 fontSize: 10,
               }}>
-              General Conditions
+              Condiciones generales
             </Text>
           </View>
           <TouchableOpacity
@@ -128,7 +128,7 @@ export default function MainView({navigation, route}) {
               resizeMode="contain"
             />
             <View style={{width: (width * 0.8 * 4) / 6}}>
-              <Text style={listStyles.name}> Wait a moment</Text>
+              <Text style={listStyles.name}>Esperar un tiempo</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -147,7 +147,7 @@ export default function MainView({navigation, route}) {
                 marginLeft: '10%',
                 fontSize: 10,
               }}>
-              Conditions by Modules
+              Condiciones por Módulo
             </Text>
           </View>
         }

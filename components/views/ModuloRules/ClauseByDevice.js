@@ -56,7 +56,7 @@ export default function MainView({navigation, route}) {
           },
         ]}>
         <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-          Select a condition
+          Selecciona una condición
         </Text>
       </View>
 
@@ -106,8 +106,8 @@ export default function MainView({navigation, route}) {
             ]}>
             <Text style={modalStyle.topText}>
               {route.params.device.devices[value.index] !== 2
-                ? 'Type a value'
-                : 'Do you want this condition?'}
+                ? 'Escribe un valor'
+                : 'Desea esta condición?'}
             </Text>
             {route.params.device.devices[value.index] !== 2 ? (
               <TextInput
@@ -141,7 +141,7 @@ export default function MainView({navigation, route}) {
                     condition: {description: ''},
                   });
                 }}>
-                <Text style={modalStyle.textStyle}>Cancel</Text>
+                <Text style={modalStyle.textStyle}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={modalStyle.modalOptionDelete}
@@ -173,7 +173,7 @@ export default function MainView({navigation, route}) {
                   }
                   navigation.navigate('RA', toret);
                 }}>
-                <Text style={modalStyle.textStyle}>Accept</Text>
+                <Text style={modalStyle.textStyle}>Aceptar</Text>
               </TouchableOpacity>
             </View>
           </View>

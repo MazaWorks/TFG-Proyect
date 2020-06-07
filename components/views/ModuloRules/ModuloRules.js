@@ -224,7 +224,7 @@ export default function MainView({navigation, route}) {
                 GPIO {data.if.device.gpio}
               </Text>
               <Text style={listStyles.deviceRoom}>
-                {deviceIf.room != null ? deviceIf.room : 'Not Assigned'}
+                {deviceIf.room != null ? deviceIf.room : 'No Asignado'}
               </Text>
             </View>
           </View>
@@ -254,7 +254,7 @@ export default function MainView({navigation, route}) {
                   GPIO {data.then[0].device.gpio}
                 </Text>
                 <Text style={listStyles.deviceRoom}>
-                  {deviceThen.room != null ? deviceThen.room : 'Not Assigned'}
+                  {deviceThen.room != null ? deviceThen.room : 'No Asignado'}
                 </Text>
               </View>
             </View>
@@ -309,7 +309,7 @@ export default function MainView({navigation, route}) {
             containerStyle={noDeviceStyles.button}
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
-            title="Create Rule"
+            title="Crear Regla"
             onPress={() => {
               if (devices.size) {
                 navigation.navigate('RA');
@@ -341,7 +341,7 @@ export default function MainView({navigation, route}) {
                       indicator: false,
                     });
                   }}>
-                  <Text style={modalStyle.textStyle}>Cancel</Text>
+                  <Text style={modalStyle.textStyle}>Cancelar</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -361,7 +361,7 @@ export default function MainView({navigation, route}) {
             marginBottom: height * 0.05,
           },
         ]}>
-        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Rule</Text>
+        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Elige una Regla</Text>
       </View>
       <OptimizedFlatList
         style={{
@@ -401,7 +401,7 @@ export default function MainView({navigation, route}) {
               };
             }}>
             <Icon name="edit" size={30} />
-            <Text style={optionsMenu.text}>Activate</Text>
+            <Text style={optionsMenu.text}>Activar</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
@@ -416,7 +416,7 @@ export default function MainView({navigation, route}) {
               });
             }}>
             <Icon name="edit" size={30} />
-            <Text style={optionsMenu.text}>Edit</Text>
+            <Text style={optionsMenu.text}>Editar</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
@@ -470,7 +470,7 @@ export default function MainView({navigation, route}) {
                 });
             }}>
             <Icon name="delete" size={30} />
-            <Text style={optionsMenu.text}>Delete</Text>
+            <Text style={optionsMenu.text}>Eliminar</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -493,7 +493,7 @@ export default function MainView({navigation, route}) {
                     indicator: false,
                   });
                 }}>
-                <Text style={modalStyle.textStyle}>Cancel</Text>
+                <Text style={modalStyle.textStyle}>Cancelar</Text>
               </TouchableOpacity>
               {modal.forceDelete && (
                 <TouchableOpacity
@@ -522,7 +522,7 @@ export default function MainView({navigation, route}) {
                         setLoading(false);
                       });
                   }}>
-                  <Text style={modalStyle.textStyle}>Force Delete</Text>
+                  <Text style={modalStyle.textStyle}>Forzar Borrado</Text>
                 </TouchableOpacity>
               )}
             </View>

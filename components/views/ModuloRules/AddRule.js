@@ -153,7 +153,7 @@ export default function MainView({navigation, route}) {
       headerLeftContainerStyle: {marginLeft: '5%'},
     };
     replace != null
-      ? navigation.setOptions({...header, title: 'Rule View'})
+      ? navigation.setOptions({...header, title: 'Detalle Regla'})
       : navigation.setOptions(header);
   }, [actuators, measurer, navigation, press.indicator, replace, route.params]);
 
@@ -198,7 +198,7 @@ export default function MainView({navigation, route}) {
               <Text style={listStyles.deviceName}>{device.name}</Text>
               <Text style={listStyles.deviceRoom}>GPIO {data.device.gpio}</Text>
               <Text style={listStyles.deviceRoom}>
-                {device.room != null ? device.room : 'Not Assigned'}
+                {device.room != null ? device.room : 'No Asignado'}
               </Text>
             </View>
           </View>
@@ -219,7 +219,7 @@ export default function MainView({navigation, route}) {
               width: width * 0.9,
             },
           ]}>
-          <Text style={listStyles.name}>Not If conditions</Text>
+          <Text style={listStyles.name}>No existe la condición</Text>
         </View>
       );
     }
@@ -271,7 +271,7 @@ export default function MainView({navigation, route}) {
                     GPIO {act.device.gpio}
                   </Text>
                   <Text style={listStyles.deviceRoom}>
-                    {device.room != null ? device.room : 'Not Assigned'}
+                    {device.room != null ? device.room : 'No Asignado'}
                   </Text>
                 </View>
               </View>
@@ -324,7 +324,7 @@ export default function MainView({navigation, route}) {
             containerStyle={noDeviceStyles.button}
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
-            title="Add a Clause"
+            title="Añadir Condición"
             onPress={() => navigation.navigate('RCH', {if: onIf})}
           />
         </View>
@@ -370,7 +370,7 @@ export default function MainView({navigation, route}) {
               });
             }}>
             <Icon name="edit" size={30} />
-            <Text style={optionsMenu.text}>Replace</Text>
+            <Text style={optionsMenu.text}>Reemplazar</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
@@ -393,7 +393,7 @@ export default function MainView({navigation, route}) {
               }
             }}>
             <Icon name="delete" size={30} />
-            <Text style={optionsMenu.text}>Delete</Text>
+            <Text style={optionsMenu.text}>Eliminar</Text>
           </TouchableOpacity>
         </View>
       )}

@@ -156,13 +156,11 @@ export default function SearchingDevices({navigation}) {
             notFoundStyles.text1,
             {marginTop: height * 0.03, marginBottom: height * 0.03},
           ]}>
-          Searching ...
+          Buscando ...
         </Text>
-        <Text style={notFoundStyles.text2}>Make sure you are connected </Text>
-        <Text style={notFoundStyles.text2}>
-          to the same network as the modules
-        </Text>
-        <Text style={notFoundStyles.text2}>and they are online and active</Text>
+        <Text style={notFoundStyles.text2}>Asegúrate de estar conectado</Text>
+        <Text style={notFoundStyles.text2}>a la misma red que los módulos</Text>
+        <Text style={notFoundStyles.text2}>y que estén online y activos</Text>
       </View>
     );
   }
@@ -177,7 +175,9 @@ export default function SearchingDevices({navigation}) {
             marginBottom: height * 0.05,
           },
         ]}>
-        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Devices Found</Text>
+        <Text style={{fontSize: 15, fontWeight: 'bold'}}>
+          Módulos Encontrados
+        </Text>
       </View>
       <OptimizedFlatList
         style={styles.flatList}

@@ -16,7 +16,7 @@ export default function RulesNavigation({navigation}) {
         name="RM"
         component={MainView}
         options={{
-          title: 'Rules',
+          title: 'Reglas',
           headerStyle: {
             backgroundColor: '#ffc400',
           },
@@ -33,7 +33,7 @@ export default function RulesNavigation({navigation}) {
         name="RA"
         component={AddRule}
         options={{
-          title: 'New Rule',
+          title: 'Nueva Regla',
           headerStyle: {
             backgroundColor: '#ffc400',
           },
@@ -49,7 +49,7 @@ export default function RulesNavigation({navigation}) {
         name="RCH"
         component={ChooseClause}
         options={{
-          title: 'Modules',
+          title: 'Módulos',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
@@ -73,7 +73,7 @@ export default function RulesNavigation({navigation}) {
         name="RCD"
         component={ClauseByDevice}
         options={{
-          title: 'Conditions',
+          title: 'Condiciones',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}

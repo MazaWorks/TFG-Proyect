@@ -15,7 +15,7 @@ export default function DevicesNavigation({navigation}) {
         name="DM"
         component={MainView}
         options={{
-          title: 'Modules',
+          title: 'Módulos',
           headerStyle: {
             backgroundColor: '#1e5885',
           },
@@ -32,7 +32,7 @@ export default function DevicesNavigation({navigation}) {
         name="DV"
         component={DeviceView}
         options={{
-          title: 'ModulesView',
+          title: 'Módulo Detalle',
           headerLeft: () => (
             <TouchableOpacity
               style={styles.iconHeaderContainer}
@@ -56,7 +56,7 @@ export default function DevicesNavigation({navigation}) {
         name="DS"
         component={SearchingDevices}
         options={{
-          title: 'Scanner',
+          title: 'Escáner',
           headerStyle: {
             backgroundColor: '#1e5885',
           },

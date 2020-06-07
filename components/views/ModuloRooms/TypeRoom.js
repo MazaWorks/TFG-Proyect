@@ -9,42 +9,42 @@ export default function TypeRoom({navigation, route}) {
   const rooms = [
     {
       id: 1,
-      room: 'Bedroom',
+      room: 'Cuarto',
       uri: require('../../../assets/Rooms/bedroom.jpg'),
     },
     {
       id: 2,
-      room: 'Kitchen',
+      room: 'Cocina',
       uri: require('../../../assets/Rooms/kitchen.jpg'),
     },
     {
       id: 3,
-      room: 'Bathroom',
+      room: 'Baño',
       uri: require('../../../assets/Rooms/bathroom.jpg'),
     },
     {
       id: 4,
-      room: 'Living Room',
+      room: 'Sala de estar',
       uri: require('../../../assets/Rooms/livingroom.jpg'),
     },
     {
       id: 5,
-      room: 'Dinning Room',
+      room: 'Comedor',
       uri: require('../../../assets/Rooms/dinningroom.jpg'),
     },
     {
       id: 6,
-      room: "Baby's Room",
+      room: 'Cuarto del bebe',
       uri: require('../../../assets/Rooms/babysroom.jpg'),
     },
     {
       id: 7,
-      room: "Children's Room",
+      room: 'Cuarto del niño',
       uri: require('../../../assets/Rooms/kiddos.jpg'),
     },
     {
       id: 8,
-      room: 'Backyard',
+      room: 'Patio',
       uri: require('../../../assets/Rooms/backyard.jpg'),
     },
   ];
@@ -81,7 +81,7 @@ export default function TypeRoom({navigation, route}) {
     <View style={styles.container}>
       <View style={styles.listHeader}>
         <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-          Which kind of room?
+          Que tipo de habitación?
         </Text>
       </View>
       <OptimizedFlatList

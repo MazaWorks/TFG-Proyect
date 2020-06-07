@@ -16,7 +16,13 @@ import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {useDimensions} from '@react-native-community/hooks';
 import {useIsFocused} from '@react-navigation/native';
 import {iconsRooms} from '../../common/ComponentsUtils';
-import {getAllData, addItem, deleteItem, renameItem} from '../../common/Dao';
+import {
+  getAllData,
+  addItem,
+  deleteItem,
+  renameItem,
+  addDeviceToRoom,
+} from '../../common/Dao';
 
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
@@ -33,11 +39,15 @@ export default function MainView({navigation, route}) {
     if (isFocused) {
       setLoading(true);
       if (route.params != null && route.params.addIndicator) {
-        addItem('rooms', rooms, route.params.newRooms, null).then(value => {
-          getRooms(value);
-          setLoading(false);
+        addItem('rooms', rooms, route.params.newRoom, null).then(value => {
+          addDeviceToRoom(route.params.newRoom, route.params.devices).then(
+            () => {
+              getRooms(value);
+              route.params = null;
+              setLoading(false);
+            },
+          );
         });
-        route.params = null;
       } else {
         getAllData('rooms').then(value => {
           getRooms(value);
@@ -88,7 +98,7 @@ export default function MainView({navigation, route}) {
           roundAvatar
           title={data.name}
           titleStyle={listStyles.roomName}
-          subtitle={`Number of Modules ${data.numberDevices}`}
+          subtitle={`Número de Módulos ${data.numberDevices}`}
           subtitleStyle={listStyles.numberDevices}
           leftElement={
             <View style={listStyles.iconRoom}>
@@ -152,7 +162,7 @@ export default function MainView({navigation, route}) {
             containerStyle={styles.noRoomButton}
             titleStyle={styles.noDeviceButtonText}
             type="outline"
-            title="Let's add rooms"
+            title="Añadir Habitaciones"
             onPress={() => navigation.navigate('ROT', {rooms: rooms})}
           />
         </View>
@@ -169,7 +179,9 @@ export default function MainView({navigation, route}) {
             marginBottom: height * 0.05,
           },
         ]}>
-        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Room</Text>
+        <Text style={{fontSize: 15, fontWeight: 'bold'}}>
+          Elegir Habitación
+        </Text>
       </View>
       <OptimizedFlatList
         style={{
@@ -200,7 +212,7 @@ export default function MainView({navigation, route}) {
               });
             }}>
             <Icon name="devices" size={30} />
-            <Text style={optionsMenu.text}>Add Module</Text>
+            <Text style={optionsMenu.text}>Añadir Módulo</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
@@ -208,7 +220,7 @@ export default function MainView({navigation, route}) {
               setRename({indicator: true, name: longPress.data.name});
             }}>
             <Icon name="edit" size={30} />
-            <Text style={optionsMenu.text}>Rename</Text>
+            <Text style={optionsMenu.text}>Renombrar</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
@@ -225,7 +237,7 @@ export default function MainView({navigation, route}) {
               });
             }}>
             <Icon name="delete" size={30} />
-            <Text style={optionsMenu.text}>Delete</Text>
+            <Text style={optionsMenu.text}>Eliminar</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -242,7 +254,7 @@ export default function MainView({navigation, route}) {
                 width: width * 0.9,
               },
             ]}>
-            <Text style={modalStyle.topText}>Type a new name</Text>
+            <Text style={modalStyle.topText}>Escribe un nuevo nombre</Text>
             <TextInput
               style={modalStyle.textInput}
               textAlign="center"
@@ -257,7 +269,7 @@ export default function MainView({navigation, route}) {
                 onPress={() => {
                   setRename({indicator: false});
                 }}>
-                <Text style={modalStyle.textStyle}>Cancel</Text>
+                <Text style={modalStyle.textStyle}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={modalStyle.modalOptionDelete}
@@ -299,7 +311,7 @@ export default function MainView({navigation, route}) {
                         rename.name !== longPress.data.name ? 'black' : 'grey',
                     },
                   ]}>
-                  Rename
+                  Renombrar
                 </Text>
               </TouchableOpacity>
             </View>
@@ -358,15 +370,13 @@ const modalStyle = StyleSheet.create({
 const optionsMenu = StyleSheet.create({
   container: {
     position: 'absolute',
-    width: '100%',
     bottom: 0,
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     backgroundColor: 'white',
   },
   iconsContainer: {
-    width: '18%',
-    height: '100%',
+    width: '33%',
     justifyContent: 'center',
     alignItems: 'center',
   },

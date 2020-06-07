@@ -25,7 +25,7 @@ export default function MainNavigation() {
         name="Rooms"
         component={RoomsNavigation}
         options={{
-          title: 'Rooms',
+          title: 'Habitaciones',
           drawerIcon: ({color}) => <Icon name="weekend" color={color} />,
         }}
       />
@@ -33,7 +33,7 @@ export default function MainNavigation() {
         name="Devices"
         component={DevicesNavigation}
         options={{
-          title: 'Modules',
+          title: 'Módulos',
           drawerIcon: ({color}) => <Icon name="devices" color={color} />,
         }}
       />
@@ -41,7 +41,7 @@ export default function MainNavigation() {
         name="Rules"
         component={RulesNavigation}
         options={{
-          title: 'Automation',
+          title: 'Automatización',
           drawerIcon: ({color}) => (
             <Icon
               name="home-automation"

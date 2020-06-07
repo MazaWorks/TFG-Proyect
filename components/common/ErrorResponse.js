@@ -6,71 +6,69 @@ export default function ErrorResponse({status}) {
     case -1:
       return (
         <View style={style.container}>
-          <Text style={style.topText}>INTERNAL ERROR</Text>
-          <Text style={style.topText2}>Please try again</Text>
-          <Text style={style.topText2}>or try to contact the author</Text>
+          <Text style={style.topText}>ERROR INTERNO</Text>
+          <Text style={style.topText2}>Inténtelo de nuevo</Text>
+          <Text style={style.topText2}>o contacte con el creador</Text>
         </View>
       );
     case 0:
       return (
         <View style={style.container}>
-          <Text style={style.topText}>ESP8266 NOT FOUND</Text>
-          <Text style={style.topText2}>Make sure the ESP8266 is active</Text>
-          <Text style={style.topText2}>and you are on the same network</Text>
+          <Text style={style.topText}>ESP8266 NO ENCONTRADO</Text>
+          <Text style={style.topText2}>Asegúrese que el ESP esté activo</Text>
+          <Text style={style.topText2}>y estáis en la misma red</Text>
         </View>
       );
     case 1:
       return (
         <View style={style.container}>
-          <Text style={style.topText}>DELETE NOT ALLOWED</Text>
-          <Text style={style.topText2}>A rule exist on this ESP</Text>
-          <Text style={style.topText2}>
-            delete all the rules on this module
-          </Text>
+          <Text style={style.topText}>NO SE PUEDE BORRAR</Text>
+          <Text style={style.topText2}>Existe una regla en este ESP</Text>
+          <Text style={style.topText2}>Borre todas las reglas de este ESP</Text>
         </View>
       );
     case 2:
       return (
         <View style={style.container}>
-          <Text style={style.topText}>FUNCTION NOT ALLOWED</Text>
-          <Text style={style.topText2}>There is no module registered</Text>
-          <Text style={style.topText2}>Register some module first</Text>
+          <Text style={style.topText}>IMPOSIBLE AÑADIR REGLAS</Text>
+          <Text style={style.topText2}>No hay módulos registrados</Text>
+          <Text style={style.topText2}>Registre algún módulo antes</Text>
         </View>
       );
     case 200:
       return (
         <View style={style.container}>
-          <Text style={style.topText}>Request completed successfully</Text>
+          <Text style={style.topText}>Petición completada con éxito</Text>
         </View>
       );
     case 201:
       return (
         <View style={style.container}>
-          <Text style={style.topText}>Rule has been created</Text>
+          <Text style={style.topText}>La regla ha sido creada</Text>
         </View>
       );
     case 400:
       return (
         <View style={style.container}>
-          <Text style={style.topText}>BAD REQUEST</Text>
-          <Text style={style.topText2}>ESP8266 doesn't accept sent data</Text>
+          <Text style={style.topText}>PETICIÓN ERRÓNEA</Text>
+          <Text style={style.topText2}>No se aceptan los datos enviados</Text>
         </View>
       );
     case 404:
       return (
         <View style={style.container}>
-          <Text style={style.topText}>SERVICE NOT FOUND</Text>
+          <Text style={style.topText}>FUNCIÓN NO IMPLEMENTADA</Text>
           <Text style={style.topText2}>
-            ESP8266 doesn't provide this service
+            El ESP no tiene implementada esta función
           </Text>
         </View>
       );
     case 409:
       return (
         <View style={style.container}>
-          <Text style={style.topText}>CONFLICT OF RULES</Text>
-          <Text style={style.topText2}>Maximum possible rules reached</Text>
-          <Text style={style.topText2}>The GPIO may also not be active</Text>
+          <Text style={style.topText}>CONFLICTO DE REGLAS</Text>
+          <Text style={style.topText2}>Máximo posible de reglas alcanzado</Text>
+          <Text style={style.topText2}>Un GPIO puede no estar activo</Text>
         </View>
       );
   }

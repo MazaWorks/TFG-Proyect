@@ -18,7 +18,7 @@ export default function RoomsNavigation({navigation}) {
         name="ROH"
         component={MainView}
         options={{
-          title: 'Home',
+          title: 'Hogar',
           headerStyle: {
             backgroundColor: '#125c28',
           },
@@ -60,7 +60,7 @@ export default function RoomsNavigation({navigation}) {
               <Icon name="close" size={30} />
             </TouchableOpacity>
           ),
-          title: 'New Room',
+          title: 'Nueva Habitación',
           headerStyle: {
             backgroundColor: '#125c28',
           },
@@ -80,7 +80,7 @@ export default function RoomsNavigation({navigation}) {
               <Icon name="arrow-left" type="material-community" size={30} />
             </TouchableOpacity>
           ),
-          title: 'New Room',
+          title: 'Nueva Habitación',
           headerStyle: {
             backgroundColor: '#125c28',
           },
@@ -100,7 +100,7 @@ export default function RoomsNavigation({navigation}) {
               <Icon name="arrow-left" type="material-community" />
             </TouchableOpacity>
           ),
-          title: 'Room Details',
+          title: 'Detalle Habitación',
           headerStyle: {
             backgroundColor: '#125c28',
           },

@@ -85,23 +85,25 @@ export function devicesRules(types) {
   for (let i = 0; i < types.length; i++) {
     switch (types[i]) {
       case -1:
-        toret.push([{id: 0, keyboardType: 1, description: 'Wait ? seconds'}]);
+        toret.push([
+          {id: 0, keyboardType: 1, description: 'Esperar ? segundos'},
+        ]);
         break;
       case 0:
         toret.push([]);
         break;
       case 1:
         toret.push([
-          {id: 0, keyboardType: 1, description: 'More than ?º (Temperature)'},
-          {id: 1, keyboardType: 1, description: 'Less than ?º (Temperature)'},
-          {id: 2, keyboardType: 1, description: 'More than ?% (Humidity)'},
-          {id: 3, keyboardType: 1, description: 'Less than ?% (Humidity)'},
+          {id: 0, keyboardType: 1, description: 'Más de ?º (Temperatura)'},
+          {id: 1, keyboardType: 1, description: 'Menos de ?º (Temperatura)'},
+          {id: 2, keyboardType: 1, description: 'Más de ?% (Humedad)'},
+          {id: 3, keyboardType: 1, description: 'Menos de ?% (Humedad)'},
         ]);
         break;
       case 2:
         toret.push([
-          {id: 0, keyboardType: 0, description: 'Turn Off'},
-          {id: 1, keyboardType: 0, description: 'Turn On'},
+          {id: 0, keyboardType: 0, description: 'Apagar'},
+          {id: 1, keyboardType: 0, description: 'Encender'},
         ]);
         break;
     }

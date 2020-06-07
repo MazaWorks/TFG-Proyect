@@ -124,7 +124,7 @@ export default function MainView({navigation, route}) {
         <View style={{width: (width * 0.8 * 4) / 6}}>
           <Text style={listStyles.name}>{data.name}</Text>
           <Text style={listStyles.subtitle}>
-            {data.room != null ? data.room : 'Not Assigned'}
+            {data.room != null ? data.room : 'No Asignado'}
           </Text>
         </View>
       </TouchableOpacity>
@@ -167,7 +167,7 @@ export default function MainView({navigation, route}) {
             containerStyle={noDeviceStyles.button}
             titleStyle={noDeviceStyles.buttonText}
             type="outline"
-            title="Find Modules"
+            title="Escanear la red"
             onPress={() => navigation.navigate('DS')}
           />
         </View>
@@ -185,7 +185,7 @@ export default function MainView({navigation, route}) {
             marginBottom: height * 0.05,
           },
         ]}>
-        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Choose a Module</Text>
+        <Text style={{fontSize: 15, fontWeight: 'bold'}}>Elige un módulo</Text>
       </View>
       <OptimizedFlatList
         style={{
@@ -213,7 +213,7 @@ export default function MainView({navigation, route}) {
               setRename({indicator: true, name: longPress.data.name});
             }}>
             <Icon name="edit" size={30} />
-            <Text style={optionsMenu.text}>Rename</Text>
+            <Text style={optionsMenu.text}>Renombrar</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={optionsMenu.iconsContainer}
@@ -236,7 +236,7 @@ export default function MainView({navigation, route}) {
               });
             }}>
             <Icon name="delete" size={30} />
-            <Text style={optionsMenu.text}>Delete</Text>
+            <Text style={optionsMenu.text}>Eliminar</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -253,7 +253,7 @@ export default function MainView({navigation, route}) {
                 width: width * 0.9,
               },
             ]}>
-            <Text style={modalStyle.topText}>Type a new name</Text>
+            <Text style={modalStyle.topText}>Escribe un nuevo nombre</Text>
             <TextInput
               style={modalStyle.textInput}
               textAlign="center"
@@ -268,7 +268,7 @@ export default function MainView({navigation, route}) {
                 onPress={() => {
                   setRename({indicator: false});
                 }}>
-                <Text style={modalStyle.textStyle}>Cancel</Text>
+                <Text style={modalStyle.textStyle}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={modalStyle.modalOptionDelete}
@@ -310,7 +310,7 @@ export default function MainView({navigation, route}) {
                         rename.name !== longPress.data.name ? 'black' : 'grey',
                     },
                   ]}>
-                  Rename
+                  Renombrar
                 </Text>
               </TouchableOpacity>
             </View>
@@ -339,7 +339,7 @@ export default function MainView({navigation, route}) {
                     indicator: false,
                   });
                 }}>
-                <Text style={modalStyle.textStyle}>Cancel</Text>
+                <Text style={modalStyle.textStyle}>Cancelar</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -483,7 +483,6 @@ const optionsMenu = StyleSheet.create({
   },
   iconsContainer: {
     width: '18%',
-    height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
   },

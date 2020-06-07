@@ -101,7 +101,7 @@ export default function MainView({navigation, route}) {
         <View style={{width: (width * 0.8 * 4) / 6}}>
           <Text style={listStyles.name}>{data.name}</Text>
           <Text style={listStyles.subtitle}>
-            {data.room != null ? data.room : 'Not Assigned'}
+            {data.room != null ? data.room : 'No Asignado'}
           </Text>
         </View>
       </TouchableOpacity>
@@ -136,7 +136,7 @@ export default function MainView({navigation, route}) {
           />
           <View style={noDeviceStyles.header}>
             <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-              No Module Available
+              No hay Módulos disponibles
             </Text>
           </View>
         </View>
@@ -155,7 +155,7 @@ export default function MainView({navigation, route}) {
           },
         ]}>
         <Text style={{fontSize: 15, fontWeight: 'bold'}}>
-          Choose the modules to move to
+          Elige el Módulo a mover a
         </Text>
         <Text style={{fontSize: 15, fontWeight: 'bold'}}>
           {route.params.data.name}
