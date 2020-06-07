@@ -114,10 +114,14 @@ export default function MainView({navigation, route}) {
                 style={modalStyle.textInput}
                 textAlign="center"
                 textContentType="name"
-                maxLength={4}
+                maxLength={3}
                 keyboardType={
                   value.condition.keyboardType === 1 ? 'numeric' : 'default'
                 }
+                defaultValue="20"
+                onLayout={() => {
+                  getValue({...value, name: '20'});
+                }}
                 onChangeText={text => {
                   getValue({...value, name: text});
                 }}
@@ -141,7 +145,6 @@ export default function MainView({navigation, route}) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={modalStyle.modalOptionDelete}
-                activeOpacity={value.name === '5' ? 0.2 : 1}
                 onPress={() => {
                   var toret = {
                     if: route.params.if,

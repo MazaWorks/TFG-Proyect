@@ -247,7 +247,7 @@ export default function MainView({navigation, route}) {
               style={modalStyle.textInput}
               textAlign="center"
               textContentType="name"
-              maxLength={12}
+              maxLength={18}
               onChangeText={text => setRename({indicator: true, name: text})}
               value={rename.name}
             />

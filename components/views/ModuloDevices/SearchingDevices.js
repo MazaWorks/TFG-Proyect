@@ -50,6 +50,7 @@ export default function SearchingDevices({navigation}) {
 
         newSocket.once('listening', function() {
           newSocket.send(msg, 0, msg.length, 8080, IPArray.join('.'));
+          newSocket.send(msg, 0, msg.length, 8080, IPArray.join('.'));
         });
 
         newSocket.on('message', function(data, rinfo) {

@@ -174,7 +174,9 @@ export default function MainView({navigation, route}) {
             },
           ]}
           onPress={() => {
-            doPress({indicator: true, data: data, index: 0});
+            if (replace == null) {
+              doPress({indicator: true, data: data, index: 0});
+            }
           }}>
           <View style={listStyles.deviceContainer}>
             <Image
