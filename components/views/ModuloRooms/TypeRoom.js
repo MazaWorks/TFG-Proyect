@@ -4,6 +4,9 @@ import {View, StyleSheet, Text, TouchableOpacity, Image} from 'react-native';
 import {useDimensions} from '@react-native-community/hooks';
 import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 
+/**
+ * Vista para elegir el tipo de habitacion a crear
+ */
 export default function TypeRoom({navigation, route}) {
   const {width} = useDimensions().window;
   const rooms = [

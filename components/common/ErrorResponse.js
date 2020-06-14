@@ -1,6 +1,7 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
+//Componente con el mensaje a mostrar en caso de error
 export default function ErrorResponse({status}) {
   switch (status) {
     case -1:

@@ -15,6 +15,9 @@ import {useDimensions} from '@react-native-community/hooks';
 import {imagesDevices} from '../../common/ComponentsUtils';
 import {getDevicesExceptRoom, addDeviceToRoom} from '../../common/Dao';
 
+/**
+ * Permite añadir módulos a una habitación específica
+ */
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, getDevices] = useState([]);

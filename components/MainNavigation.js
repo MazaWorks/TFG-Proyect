@@ -13,6 +13,10 @@ import {View, Text, Image, StyleSheet} from 'react-native';
 const Drawer = createDrawerNavigator();
 const INITIAL_ROUTE_NAME = 'Rooms';
 
+/**
+ * Navigation Drawer
+ * Este es el navegador principal de la aplicación
+ */
 export default function MainNavigation() {
   return (
     <Drawer.Navigator

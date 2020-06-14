@@ -8,6 +8,9 @@ import SearchingDevices from './SearchingDevices';
 
 const Stack = createStackNavigator();
 
+/**
+ * Navegador del apartado de módulos
+ */
 export default function DevicesNavigation({navigation}) {
   return (
     <Stack.Navigator initialRouteName="DM">

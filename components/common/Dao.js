@@ -1,5 +1,9 @@
+//DAO; maneja la lógica de la aplicación
 import AsyncStorage from '@react-native-community/async-storage';
 
+/**
+ * Devuelve el array con todos los datos en JSON
+ */
 export function getAllData(item) {
   return AsyncStorage.getItem(item)
     .then(value => {
@@ -14,6 +18,9 @@ export function getAllData(item) {
     });
 }
 
+/**
+ * Devuelve un mapa con todos los módulos registrados por la app
+ */
 export async function getMapDevices() {
   return AsyncStorage.getItem('devices')
     .then(value => {
@@ -30,6 +37,10 @@ export async function getMapDevices() {
     });
 }
 
+/**
+ * Devuelve todos los módulos registrados por la app y que no estén asociados
+ * a una habitación específica
+ */
 export function getDevicesExceptRoom(name) {
   return AsyncStorage.getItem('devices')
     .then(value => {
@@ -48,6 +59,9 @@ export function getDevicesExceptRoom(name) {
     });
 }
 
+/**
+ * Devuelve todos los módulos asociados a una habitación específica
+ */
 export function getDevicesbyRoom(roomName) {
   return AsyncStorage.getItem('devices')
     .then(value => {
@@ -67,6 +81,9 @@ export function getDevicesbyRoom(roomName) {
     });
 }
 
+/**
+ * Renombrar un elemento específico (puede ser habitación o módulo)
+ */
 export async function renameItem(name, array, item, newName) {
   var addDevices = false;
   var index = array.indexOf(item);
@@ -92,6 +109,9 @@ export async function renameItem(name, array, item, newName) {
     });
 }
 
+/**
+ * Asocia un dispositivo a una habitación
+ */
 export async function addDeviceToRoom(room, items) {
   var añade = false;
   var mapNumberDevices = new Map();
@@ -126,6 +146,9 @@ export async function addDeviceToRoom(room, items) {
   }
 }
 
+/**
+ * Añade un elemento específico (puede ser habitación, módulo o regla)
+ */
 export async function addItem(name, array, item, index) {
   var newValue = Object.assign([], array);
   var addDevices = false;
@@ -186,6 +209,9 @@ export async function addItem(name, array, item, index) {
   }
 }
 
+/**
+ * Elimina un elemento específico (puede ser habitación, módulo o regla)
+ */
 export async function deleteItem(name, array, item) {
   var addPlus = false;
   var index = array.indexOf(item);
@@ -245,6 +271,9 @@ export async function deleteItem(name, array, item) {
   }
 }
 
+/**
+ * Devuelve un boolean indicando si existen reglas en un módulo específico
+ */
 export async function existRuleOnDevice(item) {
   var rules = await getAllData('rules');
   for (const rule of rules) {

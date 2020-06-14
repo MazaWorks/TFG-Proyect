@@ -9,6 +9,9 @@ import ChooseClause from './ChooseClause';
 
 const Stack = createStackNavigator();
 
+/**
+ * Navegador del apartado de reglas
+ */
 export default function RulesNavigation({navigation}) {
   return (
     <Stack.Navigator initialRouteName="RM">

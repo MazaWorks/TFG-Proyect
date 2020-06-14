@@ -18,6 +18,9 @@ import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {imagesDevices} from '../../common/ComponentsUtils';
 import {getAllData, getMapDevices, addItem, deleteItem} from '../../common/Dao';
 
+/**
+ * Vista principal del apartado reglas
+ */
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, setDevices] = useState(new Map());

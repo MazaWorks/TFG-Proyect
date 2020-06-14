@@ -4,6 +4,7 @@ import {StyleSheet} from 'react-native';
 import {NavigationContainer} from '@react-navigation/native';
 import MainNavigation from './components/MainNavigation';
 
+//Vista principal de la aplicación
 export default function App(props) {
   return (
     <NavigationContainer>

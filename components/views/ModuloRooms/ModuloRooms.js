@@ -24,6 +24,9 @@ import {
   addDeviceToRoom,
 } from '../../common/Dao';
 
+/**
+ * Vista principal del apartado habitaciones
+ */
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [rename, setRename] = useState({indicator: false});

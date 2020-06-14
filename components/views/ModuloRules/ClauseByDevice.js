@@ -14,6 +14,10 @@ import {useDimensions} from '@react-native-community/hooks';
 import {devicesRules} from '../../common/ComponentsUtils';
 import {ScrollView} from 'react-native-gesture-handler';
 
+/**
+ * Vista para la elección del tipo de regla a ejecutar.
+ * Se elige un valor en caso de que la condición lo necesite
+ */
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [conditions, getConditions] = useState(new Map());

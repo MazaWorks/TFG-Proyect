@@ -14,6 +14,10 @@ import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {imagesDevices} from '../../common/ComponentsUtils';
 import {getAllData} from '../../common/Dao';
 
+/**
+ * Vista para la elección del dispositivo donde ejecutar la acción o condición.
+ * Permite la elección de acciones de tipo timer.
+ */
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, setDevices] = useState([]);

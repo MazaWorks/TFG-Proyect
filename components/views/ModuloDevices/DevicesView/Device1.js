@@ -10,6 +10,11 @@ import {
 } from 'react-native';
 import {useDimensions} from '@react-native-community/hooks';
 
+/**
+ * Vista de módulos ESP8266-01.
+ * Muestra los estados de los dispositivos asociados a este módulo.
+ * Se permite modificar los estados de los dispositivos que no sean sensores
+ */
 export default function DeviceView({navigation, device}) {
   const [isLoading, setLoading] = useState(true);
   const hasDHT = device.devices.indexOf(1) !== -1;

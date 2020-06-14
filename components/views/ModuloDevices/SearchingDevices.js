@@ -17,6 +17,10 @@ import {nameDefaultDevices} from '../../common/ComponentsUtils';
 import dgram from 'dgram';
 import {NetworkInfo} from 'react-native-network-info';
 
+/**
+ * Vista en la que se buscan los módulos activos en la red.
+ * Se muestran los módulos encontrados
+ */
 export default function SearchingDevices({navigation}) {
   const [devices, setDevices] = useState(new Set());
   const {width, height} = useDimensions().window;

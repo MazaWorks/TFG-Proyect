@@ -10,8 +10,10 @@
 #include <ArduinoJson.h>
 #include <WiFiUdp.h>
 
+//Access Point SSID y Password
 #define APSSID "ESP8266-1"
 #define APPASS "mypass"
+
 #define GPIODHT 0
 // Automatize
 #define NUMREGLAS 10
@@ -69,7 +71,7 @@ String body;
 const char readResponse[] PROGMEM = R"rawliteral(
 {"Values": [{"Temperature": %TEMPERATURE%, "Humidity": %HUMIDITY%}, %V1%, %V2%, %V3%]} )rawliteral";
   
-// Replaces placeholder with values
+// Reemplaza placeholder con valores reales
 String processor(const String& var) {
   if(var == "V0"){
     return String(digitalRead(0), DEC);
@@ -88,6 +90,7 @@ String processor(const String& var) {
   }
 }
 
+//Trata la creación y modificación de las reglas
 void automatize(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
   for(size_t i=0; i<len; i++) {
     body += (char)data[i];
@@ -177,6 +180,7 @@ void automatize(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_
   }
 }
 
+//Activa las reglas cuya condición es un sensor DHT
 void activateRuleType1(float temperatura, float humedad) {
   for (i2 = 0; i2 < NUMREGLAS; i2++) {
     if(!condicionActiva[i2] && condicionTipoGpio[i2] == 1) {
@@ -201,6 +205,7 @@ void activateRuleType1(float temperatura, float humedad) {
   }
 }
 
+//Activa las reglas cuya condición es un GPIO en modo output
 void activateRuleType2(int gpio, boolean on) {
   for (i2 = 0; i2 < NUMREGLAS; i2++) {
     if(!condicionActiva[i2] && condicionGpio[i2] == gpio && condicionTipoGpio[i2] == 2 && condicionID[i2] != on) {
@@ -209,6 +214,7 @@ void activateRuleType2(int gpio, boolean on) {
   }
 }
 
+//Configuración inicial del ESP8266
 void setup() {
   //Serial.begin(9600);
   
@@ -220,12 +226,14 @@ void setup() {
   
   dht.begin();
 
+// Creación de Access Point en caso de no poder conectarse
   AsyncWiFiManager wifiManager(&server, &dns);
   if (!wifiManager.autoConnect(APSSID, APPASS)) {
     ESP.reset();
     delay(1000);
   }
   
+// Definición de endpoints
   server.on("/readings", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send_P(200, "application/json", readResponse, processor);
   });
@@ -297,9 +305,11 @@ void setup() {
     request->send(404);
   });
 
+//Inicio servidor UDP
   Udp.begin(8080);
   server.begin();
-  
+
+//Primera lectura del sensor DHT
   newT = dht.readTemperature();
   newH = dht.readHumidity();
   if (!(isnan(newT) || isnan(newH)))
@@ -310,9 +320,11 @@ void setup() {
   }
 }
 
+//Bucle del ESP
 void loop() {
   currentMillis = millis();
 
+// Maneja los datagramas UDP entrantes
   int packetSize = Udp.parsePacket();
   if (packetSize) {
     int n = Udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
@@ -326,6 +338,7 @@ void loop() {
     }
   }
 
+//Comprueba si las acciones de tipo timer se han completado
   for (i = 0; i < NUMREGLAS; i++) {
     if(reglasTimerMillies[i] != 0) {
       if(currentMillis - reglasTimerPrevMillies[i] >= reglasTimerMillies[i]) {
@@ -335,6 +348,7 @@ void loop() {
     }
   }
   
+//Comprueba si una condición se ha dado
   for (i = 0; i < NUMREGLAS; i++) {
     if(condicionActiva[i]) {
       if(condicionTipoGpio[i] == 1) {
@@ -379,6 +393,8 @@ void loop() {
       }
     }
   }
+
+  //Ejecuta las acciones de las reglas activas
   if (ruleToExecute) {
     condicionActiva[ruleToExecute - 1] = 0;
     for (i = rulesToContinue[ruleToExecute - 1]; i < numeroAcciones[ruleToExecute - 1]; i++) {
@@ -405,6 +421,7 @@ void loop() {
     ruleToExecute = 0;
   }
 
+//Lee los valores del sensor de temperatura-humedad
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     newT = dht.readTemperature();

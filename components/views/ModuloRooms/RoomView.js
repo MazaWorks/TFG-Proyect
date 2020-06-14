@@ -14,6 +14,9 @@ import {useDimensions} from '@react-native-community/hooks';
 import {imagesDevices, roomsTop} from '../../common/ComponentsUtils';
 import {getDevicesbyRoom} from '../../common/Dao';
 
+/**
+ * Vista de habitación. Muestra los módulos asociados a esta
+ */
 export default function RoomView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [topView] = useState(roomsTop(route.params.data.idRoom));

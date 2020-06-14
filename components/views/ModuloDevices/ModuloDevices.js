@@ -25,6 +25,9 @@ import {
   existRuleOnDevice,
 } from '../../common/Dao';
 
+/**
+ * Vista principal del apartado módulos
+ */
 export default function MainView({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [devices, getDevices] = useState([]);

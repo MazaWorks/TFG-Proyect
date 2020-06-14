@@ -15,7 +15,11 @@ import {useDimensions} from '@react-native-community/hooks';
 import {imagesDevices} from '../../common/ComponentsUtils';
 import {getMapDevices} from '../../common/Dao';
 
-export default function MainView({navigation, route}) {
+/**
+ * Vista de una regla específica.
+ * Permite la creación y modificación de acciones y condiciones.
+ */
+export default function AddRule({navigation, route}) {
   const [isLoading, setLoading] = useState(false);
   const [devices, setDevices] = useState(new Map());
   const [measurer, setMeasurer] = useState({});

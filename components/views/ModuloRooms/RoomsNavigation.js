@@ -11,6 +11,9 @@ import DeviceView from '../ModuloDevices/DeviceView';
 
 const Stack = createStackNavigator();
 
+/**
+ * Navegador del apartado de habitaciones
+ */
 export default function RoomsNavigation({navigation}) {
   return (
     <Stack.Navigator>

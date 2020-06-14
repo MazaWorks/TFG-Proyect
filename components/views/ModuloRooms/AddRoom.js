@@ -16,6 +16,10 @@ import {OptimizedFlatList} from 'react-native-optimized-flatlist';
 import {imagesDevices} from '../../common/ComponentsUtils';
 import {getDevicesExceptRoom} from '../../common/Dao';
 
+/**
+ * Vista para elegir el nombre de la habitacion a crear
+ * Se permite asociar módulos existentes a esta
+ */
 export default function TypeRoom({navigation, route}) {
   const [isLoading, setLoading] = useState(true);
   const [roomName, onChangeText] = useState(route.params.itemName);

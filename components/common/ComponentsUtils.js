@@ -1,3 +1,5 @@
+//Funciones de uso común por la aplicación
+
 export function iconsRooms(type) {
   switch (type) {
     case 1:
