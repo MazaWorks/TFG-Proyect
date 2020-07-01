@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@react-native-community/art": "^1.2.0",
-    "@react-native-community/async-storage": "^1.9.0",
-    "@react-native-community/hooks": "^2.4.8",
+    "@react-native-community/async-storage": "^1.11.0",
+    "@react-native-community/hooks": "^2.6.0",
     "@react-native-community/masked-view": "0.1.6",
     "@react-navigation/drawer": "^5.4.1",
     "@react-navigation/native": "^5.1.5",
@@ -30,8 +30,8 @@
     "react-native-vector-icons": "^6.6.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.2",
-    "@babel/runtime": "^7.6.2",
+    "@babel/core": "^7.10.4",
+    "@babel/runtime": "^7.10.4",
     "@react-native-community/eslint-config": "^0.0.5",
     "babel-jest": "^24.9.0",
     "eslint": "^6.5.1",

@@ -7,8 +7,6 @@ import {
   TextInput,
   Image,
   TouchableOpacity,
-  ActivityIndicator,
-  Platform,
 } from 'react-native';
 import {Icon} from 'react-native-elements';
 import {useDimensions} from '@react-native-community/hooks';
@@ -21,7 +19,6 @@ import {getDevicesExceptRoom} from '../../common/Dao';
  * Se permite asociar módulos existentes a esta
  */
 export default function TypeRoom({navigation, route}) {
-  const [isLoading, setLoading] = useState(true);
   const [roomName, onChangeText] = useState(route.params.itemName);
   const [devices, getDevices] = useState([]);
   const [press, onPress] = useState({
@@ -31,10 +28,8 @@ export default function TypeRoom({navigation, route}) {
   const {width, height} = useDimensions().window;
 
   useEffect(() => {
-    setLoading(true);
     getDevicesExceptRoom(roomName).then(value => {
       getDevices(value);
-      setLoading(false);
     });
   }, [roomName]);
 
@@ -112,17 +107,6 @@ export default function TypeRoom({navigation, route}) {
       </TouchableOpacity>
     );
   };
-
-  if (isLoading) {
-    return (
-      <View style={noDeviceStyles.loadingContainer}>
-        <ActivityIndicator
-          size={Platform.OS === 'ios' ? 'large' : 90}
-          color="#0000ff"
-        />
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
